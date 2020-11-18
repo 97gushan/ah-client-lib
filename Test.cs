@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ArrowHead.Client
+namespace ArrowHead
 {
     public class Test
     {
