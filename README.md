@@ -1,2 +1,2 @@
-# ArrowHead Client Library
-A client library for ArrowHead writen in C#
+# Arrowhead Client Library
+A client library for Arrowhead writen in C#

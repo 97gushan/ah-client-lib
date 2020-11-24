@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace ArrowHead
+namespace Arrowhead
 {
     public class Test
     {
         public string GetHelloWorld()
         {
-            return "Hello ArrowHead";
+            return "Hello Arrowhead";
         }
     }
 }

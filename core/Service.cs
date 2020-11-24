@@ -4,47 +4,26 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Net.Http;
 
-using ArrowHead.Utils;
+using Arrowhead.Utils;
 
-namespace ArrowHead.Core
+namespace Arrowhead.Core
 {
     public class Service
     {
-        private string url;
-        private Http http;
+        public string serviceDefinition { get; set; }
+        public string[] interfaces { get; set; }
+        public System providerSystem;
 
-        public Service(string url)
+        public Service(System system, string serviceDefinition, string[] interfaces)
         {
-            this.url = url;
-            this.http = new Http(url, "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/sysop.p12", false);
+            this.providerSystem = system;
+            this.serviceDefinition = serviceDefinition;
+            this.interfaces = interfaces;
         }
 
-        public async void GetServices()
+        public override string ToString()
         {
-            try
-            {
-                HttpResponseMessage resp = await http.Get("/mgmt?direction=ASC&sort_field=id");
-                string respMessage = await resp.Content.ReadAsStringAsync();
-                Console.WriteLine(JsonConvert.DeserializeObject(respMessage));
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
-        public async void GetSystems()
-        {
-            try
-            {
-                HttpResponseMessage resp = await http.Get("/mgmt/systems?direction=ASC&sort_field=id");
-                string respMessage = await resp.Content.ReadAsStringAsync();
-                Console.WriteLine(JsonConvert.DeserializeObject(respMessage));
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            return this.serviceDefinition;
         }
     }
 }

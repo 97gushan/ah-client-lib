@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Security.Cryptography.X509Certificates;
 
-namespace ArrowHead.Utils
+namespace Arrowhead.Utils
 {
     public class Http
     {
@@ -48,19 +48,16 @@ namespace ArrowHead.Utils
             this.baseURI = baseURI;
         }
 
-        public async Task<HttpResponseMessage> Get(string apiEndpoint)
+        public HttpResponseMessage Get(string apiEndpoint)
         {
-            HttpResponseMessage response = await client.GetAsync(this.baseURI + apiEndpoint);
-            response.EnsureSuccessStatusCode();
+            HttpResponseMessage response = client.GetAsync(this.baseURI + apiEndpoint).Result;
             return response;
         }
 
-        public async Task<HttpResponseMessage> Post(string apiEndpoint, Object payload)
+        public HttpResponseMessage Post(string apiEndpoint, Object payload)
         {
             StringContent content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-
-            HttpResponseMessage response = await client.PostAsync(this.baseURI + apiEndpoint, content);
-            response.EnsureSuccessStatusCode();
+            HttpResponseMessage response = client.PostAsync(this.baseURI + apiEndpoint, content).Result;
             return response;
         }
     }
