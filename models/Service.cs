@@ -1,7 +1,7 @@
 using System;
 
 
-namespace Arrowhead.Core
+namespace Arrowhead.Models
 {
     public class Service
     {

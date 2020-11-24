@@ -1,9 +1,10 @@
 using System;
 using System.Net.Http;
 using Newtonsoft.Json;
-using Arrowhead.Core;
+using Arrowhead.Models;
+using Arrowhead.Utils;
 
-namespace Arrowhead.Utils
+namespace Arrowhead.Core
 {
     public class ServiceRegistry
     {

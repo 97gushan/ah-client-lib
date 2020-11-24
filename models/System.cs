@@ -1,4 +1,4 @@
-namespace Arrowhead.Core
+namespace Arrowhead.Models
 {
     public class System
     {
