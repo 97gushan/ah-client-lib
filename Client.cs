@@ -16,10 +16,7 @@ namespace Arrowhead
             this.service = new Service(this.system, "test-consumer", new string[] { "HTTPS-SECURE-JSON" });
             ServiceRegistry.InitServiceRegistry("https://127.0.0.1", "8443");
 
-            // Console.WriteLine(ServiceRegistry.RegisterService(this.service));
-
-            Console.WriteLine(ServiceRegistry.UnregisterService(this.service));
-            // Console.WriteLine(ServiceRegistry.GetServices());
+            Console.WriteLine(ServiceRegistry.RegisterService(this.service));
         }
     }
 }

@@ -21,6 +21,16 @@ namespace Arrowhead.Utils
 
         public static object RegisterService(Service payload)
         {
+
+            Service existingService = ServiceRegistry.GetService(payload.serviceDefinition);
+
+            // check if the service definition already exists in the Service Registry, 
+            // if it does then unregister the old one before the new service can be registered 
+            if (existingService != null)
+            {
+                ServiceRegistry.UnregisterService(payload);
+            }
+
             try
             {
                 HttpResponseMessage resp = http.Post("/mgmt", payload);
