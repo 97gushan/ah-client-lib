@@ -1,7 +1,7 @@
 using System;
 using Arrowhead.Core;
 using Arrowhead.Models;
-using Newtonsoft.Json;
+using Arrowhead.Utils;
 
 namespace Arrowhead
 {
@@ -23,8 +23,8 @@ namespace Arrowhead
 
         private void InitCoreSystems()
         {
-            ServiceRegistry.InitServiceRegistry("https://127.0.0.1", "8443");
-
+            Settings settings = new Settings();
+            ServiceRegistry.InitServiceRegistry(settings);
         }
     }
 }

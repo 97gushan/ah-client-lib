@@ -13,11 +13,10 @@ namespace Arrowhead.Core
 
         private static string baseUrl;
 
-
-        public static void InitServiceRegistry(string url, string port)
+        public static void InitServiceRegistry(Settings settings)
         {
-            baseUrl = url + ":" + port + "/serviceregistry";
-            http = new Http(baseUrl, "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/sysop.p12", false);
+            baseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
+            http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
         }
 
         public static object RegisterService(Service payload)
@@ -48,7 +47,6 @@ namespace Arrowhead.Core
 
         public static object UnregisterService(Service payload)
         {
-
             Service service = GetService(payload.serviceDefinition);
             if (service == null)
             {
@@ -58,7 +56,6 @@ namespace Arrowhead.Core
             {
                 try
                 {
-
                     HttpResponseMessage resp = http.Delete("/mgmt/" + service.id);
                     resp.EnsureSuccessStatusCode();
                     string respMessage = resp.Content.ReadAsStringAsync().Result;
