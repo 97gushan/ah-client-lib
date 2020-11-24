@@ -11,11 +11,9 @@ namespace Arrowhead.Core
 
         static Http http;
 
-        private static string baseUrl;
-
         public static void InitServiceRegistry(Settings settings)
         {
-            baseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
+            string baseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
             http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
         }
 

@@ -25,6 +25,7 @@ namespace Arrowhead
         {
             Settings settings = new Settings();
             ServiceRegistry.InitServiceRegistry(settings);
+            Orchestrator.InitOrchestrator(settings);
         }
     }
 }

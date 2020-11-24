@@ -21,7 +21,7 @@ namespace Arrowhead.Utils
             this.ServiceRegistryAddress = "127.0.0.1";
             this.ServiceRegistryPort = "8443";
             this.OrchestratorAddress = "127.0.0.1";
-            this.OrchestratorPort = "8444";
+            this.OrchestratorPort = "8441";
             this.AuthorizationAddress = "127.0.0.1";
             this.AuthorizationPort = "8445";
 
