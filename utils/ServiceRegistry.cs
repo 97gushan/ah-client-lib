@@ -24,7 +24,9 @@ namespace Arrowhead.Utils
             try
             {
                 HttpResponseMessage resp = http.Post("/mgmt", payload);
-                return resp.StatusCode;
+                resp.EnsureSuccessStatusCode();
+                string respMessage = resp.Content.ReadAsStringAsync().Result;
+                return JsonConvert.DeserializeObject(respMessage);
             }
             catch (HttpRequestException e)
             {
@@ -32,6 +34,60 @@ namespace Arrowhead.Utils
                 return e;
             }
         }
+
+        public static object UnregisterService(Service payload)
+        {
+
+            Service service = GetService(payload.serviceDefinition);
+            if (service == null)
+            {
+                return null;
+            }
+            else
+            {
+                try
+                {
+
+                    HttpResponseMessage resp = http.Delete("/mgmt/" + service.id);
+                    resp.EnsureSuccessStatusCode();
+                    string respMessage = resp.Content.ReadAsStringAsync().Result;
+                    return service;
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine(e.Message);
+                    return e;
+                }
+            }
+        }
+
+        public static Service GetService(string serviceDefinition)
+        {
+            try
+            {
+                HttpResponseMessage resp = http.Get("/mgmt/servicedef/" + serviceDefinition);
+                string respMessage = resp.Content.ReadAsStringAsync().Result;
+                Newtonsoft.Json.Linq.JObject tmp = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(respMessage);
+
+                if (tmp.GetValue("count").ToObject<Int32>() > 0)
+                {
+                    Newtonsoft.Json.Linq.JToken json = tmp.GetValue("data")[0];
+                    Service service = Service.Build(json);
+
+                    return service;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+        }
+
 
         public static object GetServices()
         {

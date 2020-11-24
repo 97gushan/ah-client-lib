@@ -60,5 +60,11 @@ namespace Arrowhead.Utils
             HttpResponseMessage response = client.PostAsync(this.baseURI + apiEndpoint, content).Result;
             return response;
         }
+
+        public HttpResponseMessage Delete(string apiEndpoint)
+        {
+            HttpResponseMessage response = client.DeleteAsync(this.baseURI + apiEndpoint).Result;
+            return response;
+        }
     }
 }

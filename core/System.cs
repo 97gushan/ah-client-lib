@@ -23,5 +23,19 @@ namespace Arrowhead.Core
         {
             return this.systemName + "." + cloudName + "." + op + ".Arrowhead.eu";
         }
+
+        /// <summary>
+        /// Build a System object based on a json fetched from the service registry
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        public static System Build(Newtonsoft.Json.Linq.JToken json)
+        {
+            string systemName = json.SelectToken("systemName").ToString();
+            string address = json.SelectToken("address").ToString();
+            string port = json.SelectToken("port").ToString();
+
+            return new System(systemName, address, port);
+        }
     }
 }
