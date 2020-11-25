@@ -19,6 +19,8 @@ namespace Arrowhead
             this.service = new Service(this.system, "test-consumer", new string[] { "HTTPS-SECURE-JSON" });
 
             Console.WriteLine(ServiceRegistry.RegisterService(this.service));
+            // Console.WriteLine(ServiceRegistry.GetServices());
+            Console.WriteLine(Orchestrator.Orchestrate(this.system, "hello-producer"));
         }
 
         private void InitCoreSystems()
