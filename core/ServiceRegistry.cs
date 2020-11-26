@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Arrowhead.Models;
 using Arrowhead.Utils;
 
@@ -73,11 +74,11 @@ namespace Arrowhead.Core
             {
                 HttpResponseMessage resp = http.Get("/mgmt/servicedef/" + serviceDefinition);
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
-                Newtonsoft.Json.Linq.JObject tmp = JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(respMessage);
+                JObject tmp = JsonConvert.DeserializeObject<JObject>(respMessage);
 
                 if (tmp.GetValue("count").ToObject<Int32>() > 0)
                 {
-                    Newtonsoft.Json.Linq.JToken json = tmp.GetValue("data")[0];
+                    JToken json = tmp.GetValue("data")[0];
                     Service service = Service.Build(json);
 
                     return service;

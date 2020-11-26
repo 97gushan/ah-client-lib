@@ -1,5 +1,5 @@
 using System;
-
+using Newtonsoft.Json.Linq;
 
 namespace Arrowhead.Models
 {
@@ -28,20 +28,20 @@ namespace Arrowhead.Models
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>
-        public static Service Build(Newtonsoft.Json.Linq.JToken json)
+        public static Service Build(JToken json)
         {
-            Newtonsoft.Json.Linq.JToken systemJson = json.SelectToken("provider");
+            JToken systemJson = json.SelectToken("provider");
             System sys = System.Build(systemJson);
 
-            Newtonsoft.Json.Linq.JToken serviceJson = json.SelectToken("serviceDefinition");
+            JToken serviceJson = json.SelectToken("serviceDefinition");
             string serviceDef = serviceJson.SelectToken("serviceDefinition").ToString();
 
-            Newtonsoft.Json.Linq.JArray interfacesJson = Newtonsoft.Json.Linq.JArray.Parse(json.SelectToken("interfaces").ToString());
+            JArray interfacesJson = JArray.Parse(json.SelectToken("interfaces").ToString());
 
             string[] interfaces = new string[interfacesJson.Count];
             for (int i = 0; i < interfaces.Length; i++)
             {
-                interfaces[i] = interfacesJson.Value<Newtonsoft.Json.Linq.JToken>(i).SelectToken("interfaceName").ToString();
+                interfaces[i] = interfacesJson.Value<JToken>(i).SelectToken("interfaceName").ToString();
             }
             Service service = new Service(sys, serviceDef, interfaces);
             service.id = json.SelectToken("id").ToObject<Int32>();

@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+
 namespace Arrowhead.Models
 {
     public class System
@@ -29,7 +31,7 @@ namespace Arrowhead.Models
         /// </summary>
         /// <param name="json"></param>
         /// <returns></returns>
-        public static System Build(Newtonsoft.Json.Linq.JToken json)
+        public static System Build(JToken json)
         {
             string systemName = json.SelectToken("systemName").ToString();
             string address = json.SelectToken("address").ToString();

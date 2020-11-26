@@ -1,7 +1,7 @@
 using System;
 using System.Net.Http;
 using Newtonsoft.Json;
-using Arrowhead.Models;
+using Newtonsoft.Json.Linq;
 using Arrowhead.Utils;
 
 namespace Arrowhead.Core
@@ -18,16 +18,16 @@ namespace Arrowhead.Core
 
         public static string Orchestrate(Arrowhead.Models.System consumer, string requestedServiceDefinition)
         {
-            Newtonsoft.Json.Linq.JObject payload = new Newtonsoft.Json.Linq.JObject();
-            Newtonsoft.Json.Linq.JObject requestedService = new Newtonsoft.Json.Linq.JObject();
-            Newtonsoft.Json.Linq.JArray interfaces = new Newtonsoft.Json.Linq.JArray();
-            Newtonsoft.Json.Linq.JArray security = new Newtonsoft.Json.Linq.JArray();
+            JObject payload = new JObject();
+            JObject requestedService = new JObject();
+            JArray interfaces = new JArray();
+            JArray security = new JArray();
             interfaces.Add("HTTPS-SECURE-JSON");
             security.Add("TOKEN");
             requestedService.Add("serviceDefinitionRequirement", requestedServiceDefinition);
             requestedService.Add("interfaceRequirements", interfaces);
             requestedService.Add("securityRequirements", security);
-            payload.Add("requesterSystem", JsonConvert.DeserializeObject<Newtonsoft.Json.Linq.JObject>(JsonConvert.SerializeObject(consumer)));
+            payload.Add("requesterSystem", JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(consumer)));
             payload.Add("requestedService", requestedService);
 
             try
