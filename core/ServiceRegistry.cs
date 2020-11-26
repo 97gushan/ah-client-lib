@@ -18,7 +18,7 @@ namespace Arrowhead.Core
             http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
         }
 
-        public static object RegisterService(Service payload)
+        public static ServiceResponse RegisterService(Service payload)
         {
 
             Service existingService = ServiceRegistry.GetService(payload.serviceDefinition);
@@ -30,18 +30,10 @@ namespace Arrowhead.Core
                 ServiceRegistry.UnregisterService(payload);
             }
 
-            try
-            {
-                HttpResponseMessage resp = http.Post("/mgmt", payload);
-                resp.EnsureSuccessStatusCode();
-                string respMessage = resp.Content.ReadAsStringAsync().Result;
-                return JsonConvert.DeserializeObject(respMessage);
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-                return e;
-            }
+            HttpResponseMessage resp = http.Post("/mgmt", payload);
+            string respMessage = resp.Content.ReadAsStringAsync().Result;
+            return new ServiceResponse(respMessage);
+
         }
 
         public static object UnregisterService(Service payload)
@@ -124,6 +116,27 @@ namespace Arrowhead.Core
                 Console.WriteLine(e.Message);
                 return e;
             }
+        }
+    }
+
+    public struct ServiceResponse
+    {
+        public string consumerId, interfaceId, serviceDefinitionId;
+        public ServiceResponse(string payload)
+        {
+            JObject tmp = JsonConvert.DeserializeObject<JObject>(payload);
+            JObject provider = (JObject)tmp.GetValue("provider");
+            JArray interfaces = (JArray)tmp.GetValue("interfaces");
+            JObject serviceDefinition = (JObject)tmp.GetValue("serviceDefinition");
+
+            this.consumerId = (string)provider.GetValue("id");
+            this.interfaceId = (string)((JObject)interfaces[0]).GetValue("id");
+            this.serviceDefinitionId = (string)serviceDefinition.GetValue("id");
+        }
+
+        public override string ToString()
+        {
+            return "consumerId: " + consumerId + "\ninterfaceId: " + interfaceId + "\nserviceDefinitionId: " + serviceDefinitionId;
         }
     }
 }

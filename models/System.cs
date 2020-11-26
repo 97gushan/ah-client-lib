@@ -1,10 +1,10 @@
 using Newtonsoft.Json.Linq;
-
+using System;
 namespace Arrowhead.Models
 {
     public class System
     {
-        public string systemName, address, port;
+        public string systemName, address, port, id;
         public string authenticationInfo;
 
         public System(string systemName, string address, string port)
@@ -36,8 +36,9 @@ namespace Arrowhead.Models
             string systemName = json.SelectToken("systemName").ToString();
             string address = json.SelectToken("address").ToString();
             string port = json.SelectToken("port").ToString();
-
-            return new System(systemName, address, port);
+            System system = new System(systemName, address, port);
+            system.id = json.SelectToken("id").ToString();
+            return system;
         }
     }
 }
