@@ -36,5 +36,12 @@ namespace Arrowhead.Core
                 return e.Message;
             }
         }
+
+        public static string GetPubicKey()
+        {
+            HttpResponseMessage resp = http.Get("/publickey");
+            string respMessage = resp.Content.ReadAsStringAsync().Result;
+            return respMessage;
+        }
     }
 }

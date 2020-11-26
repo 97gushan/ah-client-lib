@@ -25,7 +25,7 @@ namespace Arrowhead.Utils
             this.AuthorizationAddress = "127.0.0.1";
             this.AuthorizationPort = "8445";
 
-            this.CertificatePath = "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/sysop.p12";
+            this.CertificatePath = "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/test_consumer.p12";
         }
 
         public string getServiceRegistryUrl()
@@ -43,6 +43,11 @@ namespace Arrowhead.Utils
         {
             string scheme = this.ssl ? "https://" : "http://";
             return scheme + this.AuthorizationAddress + ":" + this.AuthorizationPort;
+        }
+
+        public bool getSSL()
+        {
+            return ssl;
         }
     }
 }

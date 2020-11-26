@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using System;
+using Arrowhead.Core;
 namespace Arrowhead.Models
 {
     public class System
@@ -7,12 +8,14 @@ namespace Arrowhead.Models
         public string systemName, address, port, id;
         public string authenticationInfo;
 
-        public System(string systemName, string address, string port)
+        public System(string systemName, string address, string port, bool ssl)
         {
             this.systemName = systemName;
             this.address = address;
             this.port = port;
-            this.authenticationInfo = "";
+
+            this.authenticationInfo = ssl ? Authorization.GetPubicKey() : "";
+
         }
 
         /// <summary>
@@ -36,7 +39,7 @@ namespace Arrowhead.Models
             string systemName = json.SelectToken("systemName").ToString();
             string address = json.SelectToken("address").ToString();
             string port = json.SelectToken("port").ToString();
-            System system = new System(systemName, address, port);
+            System system = new System(systemName, address, port, true);
             system.id = json.SelectToken("id").ToString();
             return system;
         }

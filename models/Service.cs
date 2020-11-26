@@ -10,11 +10,14 @@ namespace Arrowhead.Models
         public System providerSystem;
         public int id;
 
+        public string serviceUri;
+
         public Service(System system, string serviceDefinition, string[] interfaces)
         {
             this.providerSystem = system;
             this.serviceDefinition = serviceDefinition;
             this.interfaces = interfaces;
+            this.serviceUri = system.address;
         }
 
         public override string ToString()

@@ -25,12 +25,19 @@ namespace Arrowhead.Core
 
             // check if the service definition already exists in the Service Registry, 
             // if it does then unregister the old one before the new service can be registered 
-            if (existingService != null)
-            {
-                ServiceRegistry.UnregisterService(payload);
-            }
+            // if (existingService != null)
+            // {
+            //     ServiceRegistry.UnregisterService(payload);
+            // }
 
-            HttpResponseMessage resp = http.Post("/mgmt", payload);
+            JObject tmp = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(payload));
+            JObject providerSystem = (JObject)tmp.GetValue("providerSystem");
+            tmp.Remove("id");
+            providerSystem.Remove("id");
+            tmp.Remove("providerSystem");
+            tmp.Add("providerSystem", providerSystem);
+
+            HttpResponseMessage resp = http.Post("/register", tmp);
             string respMessage = resp.Content.ReadAsStringAsync().Result;
             return new ServiceResponse(respMessage);
 
@@ -64,8 +71,12 @@ namespace Arrowhead.Core
         {
             try
             {
-                HttpResponseMessage resp = http.Get("/mgmt/servicedef/" + serviceDefinition);
+                JObject payload = new JObject();
+                payload.Add("serviceDefinitionRequirement", serviceDefinition);
+                Console.WriteLine(payload);
+                HttpResponseMessage resp = http.Post("/query", payload);
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
+                Console.WriteLine(respMessage);
                 JObject tmp = JsonConvert.DeserializeObject<JObject>(respMessage);
 
                 if (tmp.GetValue("count").ToObject<Int32>() > 0)
