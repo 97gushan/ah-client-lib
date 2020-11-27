@@ -18,18 +18,8 @@ namespace Arrowhead.Core
             http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
         }
 
-        public static ServiceResponse RegisterService(Service payload)
+        public static object RegisterService(Service payload)
         {
-
-            Service existingService = ServiceRegistry.GetService(payload.serviceDefinition);
-
-            // check if the service definition already exists in the Service Registry, 
-            // if it does then unregister the old one before the new service can be registered 
-            // if (existingService != null)
-            // {
-            //     ServiceRegistry.UnregisterService(payload);
-            // }
-
             JObject tmp = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(payload));
             JObject providerSystem = (JObject)tmp.GetValue("providerSystem");
             tmp.Remove("id");
@@ -37,33 +27,47 @@ namespace Arrowhead.Core
             tmp.Remove("providerSystem");
             tmp.Add("providerSystem", providerSystem);
 
-            HttpResponseMessage resp = http.Post("/register", tmp);
-            string respMessage = resp.Content.ReadAsStringAsync().Result;
-            return new ServiceResponse(respMessage);
+            try
+            {
+                HttpResponseMessage resp = http.Post("/register", tmp);
+                string respMessage = resp.Content.ReadAsStringAsync().Result;
 
+                if (resp.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    UnregisterService(payload);
+                    return (ServiceResponse)RegisterService(payload);
+                }
+                else
+                {
+                    resp.EnsureSuccessStatusCode();
+                    return new ServiceResponse(respMessage);
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+                return e;
+            }
         }
 
-        public static object UnregisterService(Service payload)
+        public static bool UnregisterService(Service payload)
         {
-            Service service = GetService(payload.serviceDefinition);
-            if (service == null)
+            // setup query parameters
+            string serviceDefinition = "service_definition=" + payload.serviceDefinition;
+            string address = "address=" + payload.providerSystem.address;
+            string port = "port=" + payload.providerSystem.port;
+            string systemName = "system_name=" + payload.providerSystem.systemName;
+            try
             {
-                return null;
+                HttpResponseMessage resp = http.Delete("/unregister?" + serviceDefinition + "&" + address + "&" + port + "&" + systemName);
+                string respMessage = resp.Content.ReadAsStringAsync().Result;
+                resp.EnsureSuccessStatusCode();
+                return true;
             }
-            else
+            catch (HttpRequestException e)
             {
-                try
-                {
-                    HttpResponseMessage resp = http.Delete("/mgmt/" + service.id);
-                    resp.EnsureSuccessStatusCode();
-                    string respMessage = resp.Content.ReadAsStringAsync().Result;
-                    return service;
-                }
-                catch (HttpRequestException e)
-                {
-                    Console.WriteLine(e.Message);
-                    return e;
-                }
+                Console.WriteLine(e.Message);
+                return false;
             }
         }
 
