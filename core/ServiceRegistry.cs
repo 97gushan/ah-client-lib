@@ -40,7 +40,7 @@ namespace Arrowhead.Core
                 else
                 {
                     resp.EnsureSuccessStatusCode();
-                    return new ServiceResponse(respMessage);
+                    return new ServiceResponse(JsonConvert.DeserializeObject<JObject>(respMessage));
                 }
             }
             catch (HttpRequestException e)
@@ -71,34 +71,35 @@ namespace Arrowhead.Core
             }
         }
 
-        public static Service GetService(string serviceDefinition)
+        public static ServiceResponse GetService(string serviceDefinition, JObject providerSystem, string[] providerInterfaces)
         {
             try
             {
-                JObject payload = new JObject();
-                payload.Add("serviceDefinitionRequirement", serviceDefinition);
-                Console.WriteLine(payload);
-                HttpResponseMessage resp = http.Post("/query", payload);
+                HttpResponseMessage resp = http.Get("/mgmt/servicedef/" + serviceDefinition);
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
-                Console.WriteLine(respMessage);
-                JObject tmp = JsonConvert.DeserializeObject<JObject>(respMessage);
+                JObject respObject = JsonConvert.DeserializeObject<JObject>(respMessage);
 
-                if (tmp.GetValue("count").ToObject<Int32>() > 0)
+                JArray services = (JArray)respObject.SelectToken("data");
+                int length = (int)respObject.SelectToken("count");
+                for (int i = 0; i < length; i++)
                 {
-                    JToken json = tmp.GetValue("data")[0];
-                    Service service = Service.Build(json);
 
-                    return service;
+                    JObject service = (JObject)services[i];
+                    JObject system = (JObject)service.SelectToken("provider");
+                    JArray interfaces = (JArray)service.SelectToken("interfaces");
+
+                    if (EqualSystems(system, providerSystem) && EqualInterfaces(interfaces, providerInterfaces))
+                    {
+                        return new ServiceResponse(service);
+                    }
                 }
-                else
-                {
-                    return null;
-                }
+
+                return new ServiceResponse();
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
-                return null;
+                return new ServiceResponse();
             }
         }
 
@@ -132,26 +133,61 @@ namespace Arrowhead.Core
                 return e;
             }
         }
+
+        /// <summary>
+        /// Check if 2 systems have the same name, address and port
+        /// </summary>
+        /// <param name="sys1"></param>
+        /// <param name="sys2"></param>
+        /// <returns></returns>
+        private static bool EqualSystems(JObject sys1, JObject sys2)
+        {
+            return sys1.GetValue("systemName").ToString() == sys2.GetValue("systemName").ToString() &&
+                   sys1.GetValue("address").ToString() == sys2.GetValue("address").ToString() &&
+                   sys1.GetValue("port").ToString() == sys2.GetValue("port").ToString();
+        }
+
+        /// <summary>
+        /// Check if 2 lists of interfaces share a interface name
+        /// </summary>
+        /// <param name="interfaces1"></param>
+        /// <param name="interfaces2"></param>
+        /// <returns></returns>
+        private static bool EqualInterfaces(JArray interfaces1, string[] interfaces2)
+        {
+            for (int i = 0; i < interfaces1.Count; i++)
+            {
+                for (int j = 0; j < interfaces2.Length; j++)
+                {
+                    JObject i1 = (JObject)interfaces1[i];
+                    if (i1.GetValue("interfaceName").ToString() == interfaces2[j])
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
     public struct ServiceResponse
     {
-        public string consumerId, interfaceId, serviceDefinitionId;
-        public ServiceResponse(string payload)
+        public string providerId, interfaceId, serviceDefinitionId;
+        public ServiceResponse(JObject payload)
         {
-            JObject tmp = JsonConvert.DeserializeObject<JObject>(payload);
-            JObject provider = (JObject)tmp.GetValue("provider");
-            JArray interfaces = (JArray)tmp.GetValue("interfaces");
-            JObject serviceDefinition = (JObject)tmp.GetValue("serviceDefinition");
+            JObject provider = (JObject)payload.GetValue("provider");
+            JArray interfaces = (JArray)payload.GetValue("interfaces");
+            JObject serviceDefinition = (JObject)payload.GetValue("serviceDefinition");
 
-            this.consumerId = (string)provider.GetValue("id");
+            this.providerId = (string)provider.GetValue("id");
             this.interfaceId = (string)((JObject)interfaces[0]).GetValue("id");
             this.serviceDefinitionId = (string)serviceDefinition.GetValue("id");
         }
 
         public override string ToString()
         {
-            return "consumerId: " + consumerId + "\ninterfaceId: " + interfaceId + "\nserviceDefinitionId: " + serviceDefinitionId;
+            return "providerId: " + providerId + "\ninterfaceId: " + interfaceId + "\nserviceDefinitionId: " + serviceDefinitionId;
         }
     }
 }
