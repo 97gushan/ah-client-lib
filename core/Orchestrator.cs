@@ -28,7 +28,6 @@ namespace Arrowhead.Core
             payload.Add("requesterSystem", requesterSystem);
             payload.Add("orchestrationFlags", orchestrationFlags);
 
-            Console.WriteLine(payload);
             try
             {
                 HttpResponseMessage resp = http.Post("/orchestration", payload);

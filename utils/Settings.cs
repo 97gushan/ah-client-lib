@@ -10,9 +10,10 @@ namespace Arrowhead.Utils
         private string OrchestratorAddress, OrchestratorPort;
         private string AuthorizationAddress, AuthorizationPort;
         public string CertificatePath;
-        public string SystemName, Ip, Port;
+        public string SystemName, Ip, Port, ConsumerSystemId;
         public string ServiceDefinition, ApiUri;
         public string[] Interfaces;
+        public string CloudName, CloudOperator;
 
         /// <summary>
         /// Initializes a settings object with default settings
@@ -49,6 +50,20 @@ namespace Arrowhead.Utils
             this.SystemName = systemName;
             this.Ip = ip;
             this.Port = port;
+        }
+
+        public void SetSystemSettings(string systemName, string ip, string port, string id)
+        {
+            this.SystemName = systemName;
+            this.Ip = ip;
+            this.Port = port;
+            this.ConsumerSystemId = id;
+        }
+
+        public void SetCloudSettings(string cloudName, string cloudOperator)
+        {
+            this.CloudOperator = cloudOperator;
+            this.CloudName = cloudName;
         }
 
         public void SetCertPath(string certPath)

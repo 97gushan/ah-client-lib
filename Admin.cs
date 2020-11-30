@@ -11,28 +11,25 @@ namespace Arrowhead
     {
         public Settings settings;
 
-        public Admin(string consumerSystemId, string providerServiceDefinition, string systemName, Settings settings)
+        public Admin(Settings settings)
         {
             this.settings = settings;
-
             this.InitCoreSystems();
 
             JObject providerSystem = new JObject();
-            providerSystem.Add("systemName", systemName);
-            providerSystem.Add("address", "127.0.0.1");
-            providerSystem.Add("port", 8080);
-            providerSystem.Add("id", "18");
+            providerSystem.Add("systemName", this.settings.SystemName);
+            providerSystem.Add("address", this.settings.Ip);
+            providerSystem.Add("port", this.settings.Port);
 
             JObject cloud = new JObject();
-            cloud.Add("operator", "aitia");
-            cloud.Add("name", "testcloud2");
-
-            string interfaceName = "HTTPS-SECURE-JSON";
+            cloud.Add("operator", this.settings.CloudOperator);
+            cloud.Add("name", this.settings.CloudName);
 
             try
             {
-                Console.WriteLine(Authorization.Authorize(consumerSystemId, new string[] { "18" }, new string[] { "3" }, new string[] { "13" }));
-                Console.WriteLine(Orchestrator.StoreOrchestrate(consumerSystemId, providerServiceDefinition, interfaceName, providerSystem, cloud));
+                ServiceResponse resp = ServiceRegistry.GetService(this.settings.ServiceDefinition, providerSystem, this.settings.Interfaces);
+                Authorization.Authorize(this.settings.ConsumerSystemId, new string[] { resp.providerId }, new string[] { resp.interfaceId }, new string[] { resp.serviceDefinitionId });
+                Orchestrator.StoreOrchestrate(this.settings.ConsumerSystemId, this.settings.ServiceDefinition, this.settings.Interfaces[0], providerSystem, cloud);
             }
             catch (Exception e)
             {
