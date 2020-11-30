@@ -12,12 +12,12 @@ namespace Arrowhead.Models
 
         public string serviceUri;
 
-        public Service(System system, string serviceDefinition, string[] interfaces)
+        public Service(System system, string serviceDefinition, string[] interfaces, string serviceUri)
         {
             this.providerSystem = system;
             this.serviceDefinition = serviceDefinition;
             this.interfaces = interfaces;
-            this.serviceUri = system.address;
+            this.serviceUri = serviceUri;
         }
 
         public override string ToString()
@@ -46,7 +46,7 @@ namespace Arrowhead.Models
             {
                 interfaces[i] = interfacesJson.Value<JToken>(i).SelectToken("interfaceName").ToString();
             }
-            Service service = new Service(sys, serviceDef, interfaces);
+            Service service = new Service(sys, serviceDef, interfaces, "");
             service.id = json.SelectToken("id").ToObject<Int32>();
             return service;
         }

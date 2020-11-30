@@ -25,7 +25,12 @@ namespace Arrowhead.Utils
             this.AuthorizationAddress = "127.0.0.1";
             this.AuthorizationPort = "8445";
 
-            this.CertificatePath = "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/test_consumer.p12";
+            this.CertificatePath = "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/sysop.p12";
+        }
+
+        public void SetCertPath(string certPath)
+        {
+            this.CertificatePath = certPath;
         }
 
         public string getServiceRegistryUrl()

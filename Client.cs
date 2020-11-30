@@ -2,6 +2,8 @@ using System;
 using Arrowhead.Core;
 using Arrowhead.Models;
 using Arrowhead.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Arrowhead
 {
@@ -10,23 +12,31 @@ namespace Arrowhead
         private Service service;
         private Arrowhead.Models.System system;
 
-        private Settings settings;
+        public Settings settings;
 
-        public Client()
+        public Client(string serviceName, string systemName, Settings settings)
         {
-            this.settings = new Settings();
+            this.settings = settings;
 
             this.InitCoreSystems();
 
-            this.system = new Arrowhead.Models.System("test_consumer", "https://127.0.0.1", "8080", this.settings.getSSL());
-            this.service = new Service(this.system, "hello-consumer", new string[] { "HTTPS-SECURE-JSON" });
-            ServiceResponse serviceResp = (ServiceResponse)ServiceRegistry.RegisterService(this.service);
-            Console.WriteLine(serviceResp);
-            // Service providerService = ServiceRegistry.GetService("hello-producer");
-            // this.system.id = providerService.providerSystem.id;
-            // Console.WriteLine(Authorization.Authorize(serviceResp.consumerId, new string[] { providerService.providerSystem.id }, new string[] { serviceResp.interfaceId }, new string[] { serviceResp.serviceDefinitionId }));
-            // // Console.WriteLine(ServiceRegistry.GetServices());
-            // Console.WriteLine(Orchestrator.Orchestrate(this.system, "hello-producer"));
+            this.system = new Arrowhead.Models.System(systemName, "127.0.0.1", "8081", this.settings.getSSL());
+            this.service = new Service(this.system, serviceName, new string[] { "HTTPS-SECURE-JSON" }, "/test");
+            try
+            {
+                ServiceResponse serviceResp = (ServiceResponse)ServiceRegistry.RegisterService(this.service);
+                Console.WriteLine(serviceResp);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        public JArray Orchestrate(string producerSystemName)
+        {
+            JObject resp = JsonConvert.DeserializeObject<JObject>(Orchestrator.OrchestrateStatic(this.system, producerSystemName));
+            return (JArray)resp.SelectToken("response");
         }
 
         private void InitCoreSystems()

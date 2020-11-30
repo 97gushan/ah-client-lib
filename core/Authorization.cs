@@ -17,10 +17,10 @@ namespace Arrowhead.Core
             http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
         }
 
-        public static string Authorize(string consumerId, string[] providerIds, string[] interfaceIds, string[] serviceDefinitionIds)
+        public static string Authorize(string consumerSystemId, string[] providerIds, string[] interfaceIds, string[] serviceDefinitionIds)
         {
             JObject payload = new JObject();
-            payload.Add("consumerId", consumerId);
+            payload.Add("consumerId", consumerSystemId);
             payload.Add("providerIds", new JArray(providerIds));
             payload.Add("interfaceIds", new JArray(interfaceIds));
             payload.Add("serviceDefinitionIds", new JArray(serviceDefinitionIds));
