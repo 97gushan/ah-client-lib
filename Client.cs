@@ -14,14 +14,13 @@ namespace Arrowhead
 
         public Settings settings;
 
-        public Client(string serviceName, string systemName, Settings settings)
+        public Client(Settings settings)
         {
             this.settings = settings;
-
             this.InitCoreSystems();
 
-            this.system = new Arrowhead.Models.System(systemName, "127.0.0.1", "8081", this.settings.getSSL());
-            this.service = new Service(this.system, serviceName, new string[] { "HTTPS-SECURE-JSON" }, "/test");
+            this.system = new Arrowhead.Models.System(this.settings.SystemName, this.settings.Ip, this.settings.Port, this.settings.getSSL());
+            this.service = new Service(this.system, this.settings.ServiceDefinition, this.settings.Interfaces, this.settings.ApiUri);
             try
             {
                 ServiceResponse serviceResp = (ServiceResponse)ServiceRegistry.RegisterService(this.service);

@@ -10,12 +10,21 @@ namespace Arrowhead.Utils
         private string OrchestratorAddress, OrchestratorPort;
         private string AuthorizationAddress, AuthorizationPort;
         public string CertificatePath;
+        public string SystemName, Ip, Port;
+        public string ServiceDefinition, ApiUri;
+        public string[] Interfaces;
 
         /// <summary>
         /// Initializes a settings object with default settings
         /// </summary>
         public Settings()
         {
+            this.Interfaces = new string[] { "HTTPS-SECURE-JSON" };
+
+            this.SystemName = "";
+            this.Ip = "127.0.0.1";
+            this.Port = "8080";
+
             this.ssl = true;
             this.VerifyCertificate = false;
             this.ServiceRegistryAddress = "127.0.0.1";
@@ -26,6 +35,20 @@ namespace Arrowhead.Utils
             this.AuthorizationPort = "8445";
 
             this.CertificatePath = "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/sysop.p12";
+        }
+
+        public void SetServiceSettings(string serviceDefinition, string[] interfaces, string apiUri)
+        {
+            this.ServiceDefinition = serviceDefinition;
+            this.Interfaces = interfaces;
+            this.ApiUri = apiUri;
+        }
+
+        public void SetSystemSettings(string systemName, string ip, string port)
+        {
+            this.SystemName = systemName;
+            this.Ip = ip;
+            this.Port = port;
         }
 
         public void SetCertPath(string certPath)
