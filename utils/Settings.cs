@@ -59,6 +59,16 @@ namespace Arrowhead.Utils
             this.ssl = config.SelectToken("core.ssl").ToObject<bool>();
             this.VerifyCertificate = config.SelectToken("core.verifyCertificate").ToObject<bool>();
             this.CertificatePath = config.SelectToken("core.certificatePath").ToString();
+            try
+            {
+                this.ConsumerSystemId = config.SelectToken("consumerSystemId").ToString();
+                this.CloudOperator = config.SelectToken("cloud.operator").ToString();
+                this.CloudName = config.SelectToken("cloud.name").ToString();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public void SetServiceSettings(string serviceDefinition, string[] interfaces, string apiUri)
