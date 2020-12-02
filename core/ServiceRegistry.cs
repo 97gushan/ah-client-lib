@@ -15,7 +15,7 @@ namespace Arrowhead.Core
         public static void InitServiceRegistry(Settings settings)
         {
             string baseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
-            http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
+            http = new Http(baseUrl, settings.CertificatePath, settings.CertificatePassword, settings.VerifyCertificate);
         }
 
         public static object RegisterService(Service payload)

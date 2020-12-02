@@ -10,7 +10,7 @@ namespace Arrowhead.Utils
         private string ServiceRegistryAddress, ServiceRegistryPort;
         private string OrchestratorAddress, OrchestratorPort;
         private string AuthorizationAddress, AuthorizationPort;
-        public string CertificatePath;
+        public string CertificatePath, CertificatePassword;
         public string SystemName, Ip, Port, ConsumerSystemId;
         public string ServiceDefinition, ApiUri;
         public string[] Interfaces;
@@ -59,6 +59,8 @@ namespace Arrowhead.Utils
             this.ssl = config.SelectToken("core.ssl").ToObject<bool>();
             this.VerifyCertificate = config.SelectToken("core.verifyCertificate").ToObject<bool>();
             this.CertificatePath = config.SelectToken("core.certificatePath").ToString();
+            this.CertificatePassword = config.SelectToken("core.certificatePassword").ToString();
+
             try
             {
                 this.ConsumerSystemId = config.SelectToken("consumerSystemId").ToString();

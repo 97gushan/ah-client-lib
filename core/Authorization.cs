@@ -1,8 +1,6 @@
 using System;
 using System.Net.Http;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Arrowhead.Models;
 using Arrowhead.Utils;
 
 namespace Arrowhead.Core
@@ -14,7 +12,7 @@ namespace Arrowhead.Core
         public static void InitAuthorization(Settings settings)
         {
             string baseUrl = settings.getAuthorizationUrl() + "/authorization";
-            http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
+            http = new Http(baseUrl, settings.CertificatePath, settings.CertificatePassword, settings.VerifyCertificate);
         }
 
         public static string Authorize(string consumerSystemId, string[] providerIds, string[] interfaceIds, string[] serviceDefinitionIds)

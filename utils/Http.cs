@@ -20,10 +20,10 @@ namespace Arrowhead.Utils
         /// <param name="certPath">Path to .p12 cert file</param>
         /// <param name="verifyCert">Should the certificate be validated? 
         /// if set to false then self-signed certs can be used</param>
-        static void initHttp(string certPath, bool verifyCert)
+        static void initHttp(string certPath, string certPassword, bool verifyCert)
         {
             HttpClientHandler handler = new HttpClientHandler();
-            X509Certificate certificate = new X509Certificate2(certPath, "123456");
+            X509Certificate certificate = new X509Certificate2(certPath, certPassword);
             handler.ClientCertificates.Add(certificate);
 
             if (!verifyCert)
@@ -36,13 +36,13 @@ namespace Arrowhead.Utils
             }
             client = new HttpClient(handler);
         }
-        public Http(string baseURI, string certPath, bool verifyCert)
+        public Http(string baseURI, string certPath, string certPassword, bool verifyCert)
         {
             // only init the http client once, as it is static it can be used by every instance
             // without taking up more ports than needed
             if (client == null)
             {
-                initHttp(certPath, verifyCert);
+                initHttp(certPath, certPassword, verifyCert);
             }
 
             this.baseURI = baseURI;

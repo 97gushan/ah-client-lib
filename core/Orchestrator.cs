@@ -13,7 +13,7 @@ namespace Arrowhead.Core
         public static void InitOrchestrator(Settings settings)
         {
             string baseUrl = settings.getOrchestratorUrl() + "/orchestrator";
-            http = new Http(baseUrl, settings.CertificatePath, settings.VerifyCertificate);
+            http = new Http(baseUrl, settings.CertificatePath, settings.CertificatePassword, settings.VerifyCertificate);
         }
 
         public static string OrchestrateStatic(Arrowhead.Models.System consumer, string requestedServiceDefinition)
