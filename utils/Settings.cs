@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json.Linq;
 
 namespace Arrowhead.Utils
 {
@@ -36,6 +37,28 @@ namespace Arrowhead.Utils
             this.AuthorizationPort = "8445";
 
             this.CertificatePath = "/home/user/Projects/arrowhead/core-java-spring/certificates/testcloud2/sysop.p12";
+        }
+
+        public Settings(JObject config)
+        {
+            this.SystemName = config.SelectToken("system.name").ToString();
+            this.Ip = config.SelectToken("system.ip").ToString();
+            this.Port = config.SelectToken("system.port").ToString();
+
+            this.ServiceDefinition = config.SelectToken("service.serviceDefinition").ToString();
+            this.ApiUri = config.SelectToken("service.apiUri").ToString();
+            this.Interfaces = ((JArray)config.SelectToken("service.interfaces")).ToObject<string[]>();
+
+            this.ServiceRegistryAddress = config.SelectToken("core.serviceregistry.address").ToString();
+            this.ServiceRegistryPort = config.SelectToken("core.serviceregistry.port").ToString();
+            this.OrchestratorAddress = config.SelectToken("core.orchestrator.address").ToString();
+            this.OrchestratorPort = config.SelectToken("core.orchestrator.port").ToString();
+            this.AuthorizationAddress = config.SelectToken("core.authorization.address").ToString();
+            this.AuthorizationPort = config.SelectToken("core.authorization.port").ToString();
+
+            this.ssl = config.SelectToken("core.ssl").ToObject<bool>();
+            this.VerifyCertificate = config.SelectToken("core.verifyCertificate").ToObject<bool>();
+            this.CertificatePath = config.SelectToken("core.certificatePath").ToString();
         }
 
         public void SetServiceSettings(string serviceDefinition, string[] interfaces, string apiUri)
