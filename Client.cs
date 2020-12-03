@@ -14,6 +14,15 @@ namespace Arrowhead
 
         public Settings settings;
 
+        /// <summary>
+        /// Creates a Client object containing a Arrowhead service.
+        /// This service is then registered to the Service Registry
+        /// <remarks>
+        /// If the service already exists in the registry then the stored entry is unregistered and 
+        /// the service is reregistered
+        /// </remarks>
+        /// </summary>
+        /// <param name="settings"></param>
         public Client(Settings settings)
         {
             this.settings = settings;
@@ -29,15 +38,34 @@ namespace Arrowhead
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                throw new Exception("Could not register service " + this.settings.ServiceDefinition + " with the system " + this.settings.SystemName);
             }
         }
 
-        public JArray Orchestrate(string providerServiceDefinition)
+        /// <summary>
+        /// Start orchestation 
+        /// </summary>
+        /// <remarks>
+        /// If the response is empty then the Authenticators Intrarules entry and/or the Ochestration Store entry is wrongly configured
+        /// </remarks>
+        /// <param name="providerServiceDefinition"></param>
+        /// <returns>A JSON array containing all available providers the client system has the rights to consume</returns>
+        public JArray Orchestrate()
         {
             JObject resp = Orchestrator.OrchestrateStatic(this.system);
-            return (JArray)resp.SelectToken("response");
+            try
+            {
+                return (JArray)resp.SelectToken("response");
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Could not get Static Orchestration: \n" + resp.ToString());
+            }
         }
 
+        /// <summary>
+        /// Initializes connection to the mandatory core systems
+        /// </summary>
         private void InitCoreSystems()
         {
             ServiceRegistry.InitServiceRegistry(this.settings);

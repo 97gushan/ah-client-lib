@@ -11,11 +11,37 @@ namespace Arrowhead
     {
         public Settings settings;
 
+        /// <summary>
+        /// Creates a Admin object with access to the management endpoints 
+        /// of the core system APIs
+        /// </summary>
+        /// <remarks>
+        /// <list>
+        ///     <item>Consumer System ID of the system that should have access to a specific Provider Service</item>
+        /// 
+        ///     <item>Provider Service definition of the Service the Consumer wants to consume</item>
+        ///     <item>Provider System the wanted Provider Service is a part of</item>
+        ///     <item>Provider Service interfaces the Provider allows</item>
+        ///     
+        ///     <item>Cloud Name</item>
+        ///     <item>Cloud Operator</item>
+        /// </list>
+        /// </remarks>
+        ///  
+        /// <param name="settings"></param>
         public Admin(Settings settings)
         {
             this.settings = settings;
             this.InitCoreSystems();
+        }
 
+        /// <summary>
+        /// Given a Consumer System ID, a Provider Service Definition, a Provider System
+        /// interfaces and cloud information it creates the Intracloud ruleset in the Authenticator
+        /// and stores the Orchestration Entry so that the Consumer can consume the Provider service
+        /// </summary>
+        public void StoreOrchestrate()
+        {
             JObject providerSystem = new JObject();
             providerSystem.Add("systemName", this.settings.SystemName);
             providerSystem.Add("address", this.settings.Ip);
