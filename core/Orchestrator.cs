@@ -16,7 +16,21 @@ namespace Arrowhead.Core
             http = new Http(baseUrl, settings.CertificatePath, settings.CertificatePassword, settings.VerifyCertificate);
         }
 
-        public static string OrchestrateStatic(Arrowhead.Models.System consumer, string requestedServiceDefinition)
+        /// <summary>
+        /// Start static orchestration by fetching provider data from the Orchestrator.
+        /// This will provide a list of 
+        /// </summary>
+        /// <remarks>
+        /// This is a call to the Client endpoint of the Orchestrator API thus it requires:
+        /// <list>
+        /// <item> A certificate for the consumer system</item>
+        /// <item> An intracloud ruleset stored in the Authenticator by an Admin via the management endpoint or the Management Tools</item>
+        /// <item> An store entry in the Orchestrator by an Admin via the management endpoint or the Management Tools</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="consumer"></param>
+        /// <returns></returns>
+        public static JObject OrchestrateStatic(Arrowhead.Models.System consumer)
         {
             JObject payload = new JObject();
             JObject requesterSystem = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(consumer));
@@ -28,21 +42,27 @@ namespace Arrowhead.Core
             payload.Add("requesterSystem", requesterSystem);
             payload.Add("orchestrationFlags", orchestrationFlags);
 
-            try
-            {
-                HttpResponseMessage resp = http.Post("/orchestration", payload);
-                string respMessage = resp.Content.ReadAsStringAsync().Result;
-                Console.WriteLine(resp.StatusCode);
-
-                return respMessage;
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-                return e.Message;
-            }
+            HttpResponseMessage resp = http.Post("/orchestration", payload);
+            string respMessage = resp.Content.ReadAsStringAsync().Result;
+            JObject result = JsonConvert.DeserializeObject<JObject>(respMessage);
+            return result;
         }
 
+        /// <summary>
+        /// Add a store entry to the orchestration store, this is needed for the Consumer to 
+        /// be able to fetch the orchestration information about the Provider from the Orchestrator
+        /// </summary>
+        /// <remarks>
+        /// NOTE This is a call to the Management endpoint of the Orchestrator, thus it requires a Sysop Certificate
+        /// This can also be done via the Management Tool on the Arrowhead Tools Github page
+        /// https://github.com/arrowhead-tools/mgmt-tool-js
+        /// </remarks>
+        /// <param name="consumerSystemId"></param>
+        /// <param name="requestedServiceDefinition"></param>
+        /// <param name="serviceInterfaceName"></param>
+        /// <param name="providerSystem"></param>
+        /// <param name="cloud"></param>
+        /// <returns></returns>
         public static string StoreOrchestrate(string consumerSystemId, string requestedServiceDefinition, string serviceInterfaceName, JObject providerSystem, JObject cloud)
         {
             JObject entry = new JObject();

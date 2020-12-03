@@ -71,6 +71,17 @@ namespace Arrowhead.Core
             }
         }
 
+        /// <summary>
+        /// Returns a ServiceResponse with IDs of provider, interfaces and service definition of a wanted
+        /// service, system and interface combination
+        /// </summary>
+        /// <remarks>
+        /// NOTE This is a call to the Management endpoint of the Orchestrator, thus it requires a Sysop Certificate
+        /// </remarks>
+        /// <param name = "serviceDefinition" ></ param >
+        /// <param name="providerSystem"></param>
+        /// <param name="providerInterfaces"></param>
+        /// <returns></returns>
         public static ServiceResponse GetService(string serviceDefinition, JObject providerSystem, string[] providerInterfaces)
         {
             try

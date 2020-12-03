@@ -13,13 +13,11 @@ namespace Arrowhead.Models
             this.systemName = systemName;
             this.address = address;
             this.port = port;
-
             this.authenticationInfo = ssl ? Authorization.GetPubicKey() : "";
-
         }
 
         /// <summary>
-        /// Returns a 
+        /// Returns the system name in the Arrowhead common format of "systemname.cloudName.operator.Arrowhead.eu"  
         /// </summary>
         /// <param name="op"></param>
         /// <param name="cloudName"></param>

@@ -34,7 +34,7 @@ namespace Arrowhead
 
         public JArray Orchestrate(string providerServiceDefinition)
         {
-            JObject resp = JsonConvert.DeserializeObject<JObject>(Orchestrator.OrchestrateStatic(this.system, providerServiceDefinition));
+            JObject resp = Orchestrator.OrchestrateStatic(this.system);
             return (JArray)resp.SelectToken("response");
         }
 
