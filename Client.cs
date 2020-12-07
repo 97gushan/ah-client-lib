@@ -55,6 +55,38 @@ namespace Arrowhead
         }
 
         /// <summary>
+        /// This methods builds a list of URLs that the producing service can be reached by
+        /// These urls are based on the system address and port as wells as the serviceUri 
+        /// The method checks what interfaces the service accepts and sets the url to either 
+        /// http or https depending on the interfaces specified
+        /// </summary>
+        /// <returns>A list of URLs that can be used to connect to the service</returns>
+        public string[] GetServiceURLs()
+        {
+            string baseURL = this.system.address + ":" + this.system.port + this.service.serviceUri + "/";
+
+            string[] urls = new string[this.service.interfaces.Length];
+
+            for (int i = 0; i < this.service.interfaces.Length; i++)
+            {
+                if (this.service.interfaces[i] == "HTTPS-SECURE-JSON")
+                {
+                    urls[i] = "https://" + baseURL;
+                }
+                else if (this.service.interfaces[i] == "HTTP-INSECURE-JSON")
+                {
+                    urls[i] = "http://" + baseURL;
+                }
+                else
+                {
+                    throw new Exception("Invalid interface type " + this.service.interfaces[i]);
+                }
+            }
+
+            return urls;
+        }
+
+        /// <summary>
         /// Start orchestation 
         /// </summary>
         /// <remarks>
