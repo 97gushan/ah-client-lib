@@ -8,12 +8,13 @@ namespace Arrowhead.Core
 {
     public class Orchestrator
     {
-        static Http http;
 
-        public static void InitOrchestrator(Settings settings)
+        private Http http;
+        private string baseUrl;
+        public Orchestrator(Http http, Settings settings)
         {
-            string baseUrl = settings.getOrchestratorUrl() + "/orchestrator";
-            http = new Http(baseUrl, settings.CertificatePath, settings.CertificatePassword, settings.VerifyCertificate);
+            this.baseUrl = settings.getOrchestratorUrl() + "/orchestrator";
+            this.http = http;
         }
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace Arrowhead.Core
         /// </remarks>
         /// <param name="consumer"></param>
         /// <returns></returns>
-        public static JObject OrchestrateStatic(Arrowhead.Models.System consumer)
+        public JObject OrchestrateStatic(Arrowhead.Models.System consumer)
         {
             JObject payload = new JObject();
             JObject requesterSystem = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(consumer));
@@ -42,7 +43,7 @@ namespace Arrowhead.Core
             payload.Add("requesterSystem", requesterSystem);
             payload.Add("orchestrationFlags", orchestrationFlags);
 
-            HttpResponseMessage resp = http.Post("/orchestration", payload);
+            HttpResponseMessage resp = this.http.Post(this.baseUrl, "/orchestration", payload);
             string respMessage = resp.Content.ReadAsStringAsync().Result;
             JObject result = JsonConvert.DeserializeObject<JObject>(respMessage);
             return result;
@@ -63,7 +64,7 @@ namespace Arrowhead.Core
         /// <param name="providerSystem"></param>
         /// <param name="cloud"></param>
         /// <returns></returns>
-        public static string StoreOrchestrate(string consumerSystemId, string requestedServiceDefinition, string serviceInterfaceName, JObject providerSystem, JObject cloud)
+        public void StoreOrchestrate(string consumerSystemId, string requestedServiceDefinition, string serviceInterfaceName, JObject providerSystem, JObject cloud)
         {
             JObject entry = new JObject();
             entry.Add("serviceDefinitionName", requestedServiceDefinition);
@@ -77,22 +78,13 @@ namespace Arrowhead.Core
             JArray payload = new JArray();
             payload.Add(entry);
 
-            try
-            {
-                HttpResponseMessage resp = http.Post("/mgmt/store", payload);
-                string respMessage = resp.Content.ReadAsStringAsync().Result;
-                return respMessage;
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-                return e.Message;
-            }
+            HttpResponseMessage resp = this.http.Post(this.baseUrl, "/mgmt/store", payload);
+            resp.EnsureSuccessStatusCode();
         }
 
-        public static string GetOrchestrationById(string id)
+        public string GetOrchestrationById(string id)
         {
-            HttpResponseMessage resp = http.Get("/orchestration/" + id);
+            HttpResponseMessage resp = this.http.Get(this.baseUrl, "/orchestration/" + id);
             string respMessage = resp.Content.ReadAsStringAsync().Result;
             return respMessage;
         }

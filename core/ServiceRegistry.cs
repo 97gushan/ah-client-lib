@@ -10,15 +10,16 @@ namespace Arrowhead.Core
     public class ServiceRegistry
     {
 
-        static Http http;
+        private Http http;
+        private string baseUrl;
 
-        public static void InitServiceRegistry(Settings settings)
+        public ServiceRegistry(Http http, Settings settings)
         {
-            string baseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
-            http = new Http(baseUrl, settings.CertificatePath, settings.CertificatePassword, settings.VerifyCertificate);
+            this.baseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
+            this.http = http;
         }
 
-        public static object RegisterService(Service payload)
+        public object RegisterService(Service payload)
         {
             JObject tmp = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(payload));
             JObject providerSystem = (JObject)tmp.GetValue("providerSystem");
@@ -26,16 +27,20 @@ namespace Arrowhead.Core
             providerSystem.Remove("id");
             tmp.Remove("providerSystem");
             tmp.Add("providerSystem", providerSystem);
-
             try
             {
-                HttpResponseMessage resp = http.Post("/register", tmp);
+                HttpResponseMessage resp = this.http.Post(this.baseUrl, "/register", tmp);
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
-
                 if (resp.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
-                    UnregisterService(payload);
-                    return (ServiceResponse)RegisterService(payload);
+                    if (UnregisterService(payload))
+                    {
+                        return (ServiceResponse)RegisterService(payload);
+                    }
+                    else
+                    {
+                        throw new Exception("Could not unregister existing service");
+                    }
                 }
                 else
                 {
@@ -50,7 +55,7 @@ namespace Arrowhead.Core
             }
         }
 
-        public static bool UnregisterService(Service payload)
+        public bool UnregisterService(Service payload)
         {
             // setup query parameters
             string serviceDefinition = "service_definition=" + payload.serviceDefinition;
@@ -59,7 +64,7 @@ namespace Arrowhead.Core
             string systemName = "system_name=" + payload.providerSystem.systemName;
             try
             {
-                HttpResponseMessage resp = http.Delete("/unregister?" + serviceDefinition + "&" + address + "&" + port + "&" + systemName);
+                HttpResponseMessage resp = this.http.Delete(this.baseUrl, "/unregister?" + serviceDefinition + "&" + address + "&" + port + "&" + systemName);
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
                 resp.EnsureSuccessStatusCode();
                 return true;
@@ -82,44 +87,38 @@ namespace Arrowhead.Core
         /// <param name="providerSystem"></param>
         /// <param name="providerInterfaces"></param>
         /// <returns></returns>
-        public static ServiceResponse GetService(string serviceDefinition, JObject providerSystem, string[] providerInterfaces)
+        public ServiceResponse GetService(string serviceDefinition, JObject providerSystem, string[] providerInterfaces)
         {
-            try
-            {
-                HttpResponseMessage resp = http.Get("/mgmt/servicedef/" + serviceDefinition);
-                string respMessage = resp.Content.ReadAsStringAsync().Result;
-                JObject respObject = JsonConvert.DeserializeObject<JObject>(respMessage);
 
-                JArray services = (JArray)respObject.SelectToken("data");
-                int length = (int)respObject.SelectToken("count");
-                for (int i = 0; i < length; i++)
+            HttpResponseMessage resp = this.http.Get(this.baseUrl, "/mgmt/servicedef/" + serviceDefinition);
+            resp.EnsureSuccessStatusCode();
+
+            string respMessage = resp.Content.ReadAsStringAsync().Result;
+            JObject respObject = JsonConvert.DeserializeObject<JObject>(respMessage);
+
+            JArray services = (JArray)respObject.SelectToken("data");
+            int length = (int)respObject.SelectToken("count");
+            for (int i = 0; i < length; i++)
+            {
+                JObject service = (JObject)services[i];
+                JObject system = (JObject)service.SelectToken("provider");
+                JArray interfaces = (JArray)service.SelectToken("interfaces");
+
+                if (EqualSystems(system, providerSystem) && EqualInterfaces(interfaces, providerInterfaces))
                 {
-
-                    JObject service = (JObject)services[i];
-                    JObject system = (JObject)service.SelectToken("provider");
-                    JArray interfaces = (JArray)service.SelectToken("interfaces");
-
-                    if (EqualSystems(system, providerSystem) && EqualInterfaces(interfaces, providerInterfaces))
-                    {
-                        return new ServiceResponse(service);
-                    }
+                    return new ServiceResponse(service);
                 }
+            }
 
-                return new ServiceResponse();
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-                return new ServiceResponse();
-            }
+            return new ServiceResponse();
         }
 
 
-        public static object GetServices()
+        public object GetServices()
         {
             try
             {
-                HttpResponseMessage resp = http.Get("/mgmt?direction=ASC&sort_field=id");
+                HttpResponseMessage resp = this.http.Get(this.baseUrl, "/mgmt?direction=ASC&sort_field=id");
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
                 return JsonConvert.DeserializeObject(respMessage);
             }
@@ -130,11 +129,11 @@ namespace Arrowhead.Core
             }
         }
 
-        public static object GetSystems()
+        public object GetSystems()
         {
             try
             {
-                HttpResponseMessage resp = http.Get("/mgmt/systems?direction=ASC&sort_field=id");
+                HttpResponseMessage resp = this.http.Get(this.baseUrl, "/mgmt/systems?direction=ASC&sort_field=id");
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
                 return JsonConvert.DeserializeObject(respMessage);
             }

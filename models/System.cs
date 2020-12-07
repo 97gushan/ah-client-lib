@@ -8,12 +8,12 @@ namespace Arrowhead.Models
         public string systemName, address, port, id;
         public string authenticationInfo;
 
-        public System(string systemName, string address, string port, bool ssl)
+        public System(string systemName, string address, string port, string authenticationInfo)
         {
             this.systemName = systemName;
             this.address = address;
             this.port = port;
-            this.authenticationInfo = ssl ? Authorization.GetPubicKey() : "";
+            this.authenticationInfo = authenticationInfo;
         }
 
         /// <summary>
@@ -37,7 +37,8 @@ namespace Arrowhead.Models
             string systemName = json.SelectToken("systemName").ToString();
             string address = json.SelectToken("address").ToString();
             string port = json.SelectToken("port").ToString();
-            System system = new System(systemName, address, port, true);
+            string authInfo = json.SelectToken("authenticationInfo").ToString();
+            System system = new System(systemName, address, port, authInfo);
             system.id = json.SelectToken("id").ToString();
             return system;
         }

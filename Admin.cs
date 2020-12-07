@@ -9,6 +9,9 @@ namespace Arrowhead
 {
     public class Admin
     {
+        private ServiceRegistry ServiceRegistry;
+        private Orchestrator Orchestrator;
+        private Authorization Authorization;
         public Settings settings;
 
         /// <summary>
@@ -40,7 +43,7 @@ namespace Arrowhead
         /// interfaces and cloud information it creates the Intracloud ruleset in the Authenticator
         /// and stores the Orchestration Entry so that the Consumer can consume the Provider service
         /// </summary>
-        public void StoreOrchestrate()
+        public void StoreOrchestrate(string consumerSystemId)
         {
             JObject providerSystem = new JObject();
             providerSystem.Add("systemName", this.settings.SystemName);
@@ -54,8 +57,10 @@ namespace Arrowhead
             try
             {
                 ServiceResponse resp = ServiceRegistry.GetService(this.settings.ServiceDefinition, providerSystem, this.settings.Interfaces);
-                Authorization.Authorize(this.settings.ConsumerSystemId, new string[] { resp.providerId }, new string[] { resp.interfaceId }, new string[] { resp.serviceDefinitionId });
-                Orchestrator.StoreOrchestrate(this.settings.ConsumerSystemId, this.settings.ServiceDefinition, this.settings.Interfaces[0], providerSystem, cloud);
+                Authorization.Authorize(consumerSystemId, new string[] { resp.providerId }, new string[] { resp.interfaceId }, new string[] { resp.serviceDefinitionId });
+                Console.WriteLine("Intracloud ruleset created");
+                Orchestrator.StoreOrchestrate(consumerSystemId, this.settings.ServiceDefinition, this.settings.Interfaces[0], providerSystem, cloud);
+                Console.WriteLine("Orchestration store entry added");
             }
             catch (Exception e)
             {
@@ -63,11 +68,15 @@ namespace Arrowhead
             }
         }
 
+        /// <summary>
+        /// Initializes connection to the mandatory core systems
+        /// </summary>
         private void InitCoreSystems()
         {
-            ServiceRegistry.InitServiceRegistry(this.settings);
-            Authorization.InitAuthorization(this.settings);
-            Orchestrator.InitOrchestrator(this.settings);
+            Http http = new Http(this.settings);
+            this.ServiceRegistry = new ServiceRegistry(http, this.settings);
+            this.Authorization = new Authorization(http, this.settings);
+            this.Orchestrator = new Orchestrator(http, this.settings);
         }
     }
 }

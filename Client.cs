@@ -12,6 +12,10 @@ namespace Arrowhead
         private Service service;
         private Arrowhead.Models.System system;
 
+        private ServiceRegistry ServiceRegistry;
+        private Orchestrator Orchestrator;
+        private Authorization Authorization;
+
         public Settings settings;
 
         /// <summary>
@@ -28,18 +32,26 @@ namespace Arrowhead
             this.settings = settings;
             this.InitCoreSystems();
 
-            this.system = new Arrowhead.Models.System(this.settings.SystemName, this.settings.Ip, this.settings.Port, this.settings.getSSL());
+            string authInfo = this.settings.getSSL() ? Authorization.GetPubicKey() : "";
+
+            this.system = new Arrowhead.Models.System(this.settings.SystemName, this.settings.Ip, this.settings.Port, authInfo);
             this.service = new Service(this.system, this.settings.ServiceDefinition, this.settings.Interfaces, this.settings.ApiUri);
             try
             {
                 ServiceResponse serviceResp = (ServiceResponse)ServiceRegistry.RegisterService(this.service);
-                Console.WriteLine(serviceResp);
+                this.system.id = serviceResp.providerId;
+                Console.WriteLine(this.service.serviceDefinition + " was registered on the system " + this.system.systemName);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 throw new Exception("Could not register service " + this.settings.ServiceDefinition + " with the system " + this.settings.SystemName);
             }
+        }
+
+        public string GetSystemId()
+        {
+            return this.system.id;
         }
 
         /// <summary>
@@ -52,7 +64,7 @@ namespace Arrowhead
         /// <returns>A JSON array containing all available providers the client system has the rights to consume</returns>
         public JArray Orchestrate()
         {
-            JObject resp = Orchestrator.OrchestrateStatic(this.system);
+            JObject resp = this.Orchestrator.OrchestrateStatic(this.system);
             try
             {
                 return (JArray)resp.SelectToken("response");
@@ -68,9 +80,10 @@ namespace Arrowhead
         /// </summary>
         private void InitCoreSystems()
         {
-            ServiceRegistry.InitServiceRegistry(this.settings);
-            Authorization.InitAuthorization(this.settings);
-            Orchestrator.InitOrchestrator(this.settings);
+            Http http = new Http(this.settings);
+            this.ServiceRegistry = new ServiceRegistry(http, this.settings);
+            this.Authorization = new Authorization(http, this.settings);
+            this.Orchestrator = new Orchestrator(http, this.settings);
         }
     }
 }

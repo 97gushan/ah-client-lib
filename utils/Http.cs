@@ -9,24 +9,15 @@ namespace Arrowhead.Utils
 {
     public class Http
     {
+        private HttpClient client;
 
-        static HttpClient client;
-
-        private string baseURI;
-
-        /// <summary>
-        /// Initialize a static HttpClient using the given certificate 
-        /// </summary>
-        /// <param name="certPath">Path to .p12 cert file</param>
-        /// <param name="verifyCert">Should the certificate be validated? 
-        /// if set to false then self-signed certs can be used</param>
-        static void initHttp(string certPath, string certPassword, bool verifyCert)
+        public Http(Settings settings)
         {
             HttpClientHandler handler = new HttpClientHandler();
-            X509Certificate certificate = new X509Certificate2(certPath, certPassword);
+            X509Certificate certificate = new X509Certificate2(settings.CertificatePath, settings.CertificatePassword);
             handler.ClientCertificates.Add(certificate);
 
-            if (!verifyCert)
+            if (!settings.VerifyCertificate)
             {
                 handler.ServerCertificateCustomValidationCallback =
                     (httpRequestMessage, cert, cetChain, policyErrors) =>
@@ -34,36 +25,25 @@ namespace Arrowhead.Utils
                     return true;
                 };
             }
-            client = new HttpClient(handler);
-        }
-        public Http(string baseURI, string certPath, string certPassword, bool verifyCert)
-        {
-            // only init the http client once, as it is static it can be used by every instance
-            // without taking up more ports than needed
-            if (client == null)
-            {
-                initHttp(certPath, certPassword, verifyCert);
-            }
-
-            this.baseURI = baseURI;
+            this.client = new HttpClient(handler);
         }
 
-        public HttpResponseMessage Get(string apiEndpoint)
+        public HttpResponseMessage Get(string baseURL, string apiEndpoint)
         {
-            HttpResponseMessage response = client.GetAsync(this.baseURI + apiEndpoint).Result;
+            HttpResponseMessage response = client.GetAsync(baseURL + apiEndpoint).Result;
             return response;
         }
 
-        public HttpResponseMessage Post(string apiEndpoint, Object payload)
+        public HttpResponseMessage Post(string baseURL, string apiEndpoint, Object payload)
         {
             StringContent content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-            HttpResponseMessage response = client.PostAsync(this.baseURI + apiEndpoint, content).Result;
+            HttpResponseMessage response = client.PostAsync(baseURL + apiEndpoint, content).Result;
             return response;
         }
 
-        public HttpResponseMessage Delete(string apiEndpoint)
+        public HttpResponseMessage Delete(string baseURL, string apiEndpoint)
         {
-            HttpResponseMessage response = client.DeleteAsync(this.baseURI + apiEndpoint).Result;
+            HttpResponseMessage response = client.DeleteAsync(baseURL + apiEndpoint).Result;
             return response;
         }
     }

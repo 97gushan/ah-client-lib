@@ -7,12 +7,13 @@ namespace Arrowhead.Core
 {
     public class Authorization
     {
-        static Http http;
+        private Http http;
+        private string baseUrl;
 
-        public static void InitAuthorization(Settings settings)
+        public Authorization(Http http, Settings settings)
         {
-            string baseUrl = settings.getAuthorizationUrl() + "/authorization";
-            http = new Http(baseUrl, settings.CertificatePath, settings.CertificatePassword, settings.VerifyCertificate);
+            this.baseUrl = settings.getAuthorizationUrl() + "/authorization";
+            this.http = http;
         }
 
 
@@ -29,29 +30,21 @@ namespace Arrowhead.Core
         /// <param name="interfaceIds"></param>
         /// <param name="serviceDefinitionIds"></param>
         /// <returns></returns>
-        public static string Authorize(string consumerSystemId, string[] providerIds, string[] interfaceIds, string[] serviceDefinitionIds)
+        public void Authorize(string consumerSystemId, string[] providerIds, string[] interfaceIds, string[] serviceDefinitionIds)
         {
             JObject payload = new JObject();
             payload.Add("consumerId", consumerSystemId);
             payload.Add("providerIds", new JArray(providerIds));
             payload.Add("interfaceIds", new JArray(interfaceIds));
             payload.Add("serviceDefinitionIds", new JArray(serviceDefinitionIds));
-            try
-            {
-                HttpResponseMessage resp = http.Post("/mgmt/intracloud", payload);
-                string respMessage = resp.Content.ReadAsStringAsync().Result;
-                return respMessage;
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-                return e.Message;
-            }
+
+            HttpResponseMessage resp = this.http.Post(this.baseUrl, "/mgmt/intracloud", payload);
+            resp.EnsureSuccessStatusCode();
         }
 
-        public static string GetPubicKey()
+        public string GetPubicKey()
         {
-            HttpResponseMessage resp = http.Get("/publickey");
+            HttpResponseMessage resp = this.http.Get(this.baseUrl, "/publickey");
             string respMessage = resp.Content.ReadAsStringAsync().Result;
             return respMessage;
         }

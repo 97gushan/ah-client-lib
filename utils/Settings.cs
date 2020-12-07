@@ -63,7 +63,6 @@ namespace Arrowhead.Utils
 
             try
             {
-                this.ConsumerSystemId = config.SelectToken("consumerSystemId").ToString();
                 this.CloudOperator = config.SelectToken("cloud.operator").ToString();
                 this.CloudName = config.SelectToken("cloud.name").ToString();
             }
