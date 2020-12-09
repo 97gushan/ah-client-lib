@@ -6,7 +6,7 @@ namespace Arrowhead.Utils
     public class Settings
     {
 
-        public Boolean ssl, VerifyCertificate;
+        public Boolean CoreSSL, VerifyCertificate;
         private string ServiceRegistryAddress, ServiceRegistryPort;
         private string OrchestratorAddress, OrchestratorPort;
         private string AuthorizationAddress, AuthorizationPort;
@@ -27,7 +27,7 @@ namespace Arrowhead.Utils
             this.Ip = "127.0.0.1";
             this.Port = "8080";
 
-            this.ssl = true;
+            this.CoreSSL = true;
             this.VerifyCertificate = false;
             this.ServiceRegistryAddress = "127.0.0.1";
             this.ServiceRegistryPort = "8443";
@@ -56,7 +56,7 @@ namespace Arrowhead.Utils
             this.AuthorizationAddress = config.SelectToken("core.authorization.address").ToString();
             this.AuthorizationPort = config.SelectToken("core.authorization.port").ToString();
 
-            this.ssl = config.SelectToken("core.ssl").ToObject<bool>();
+            this.CoreSSL = config.SelectToken("core.ssl").ToObject<bool>();
             this.VerifyCertificate = config.SelectToken("core.verifyCertificate").ToObject<bool>();
             this.CertificatePath = config.SelectToken("core.certificatePath").ToString();
             this.CertificatePassword = config.SelectToken("core.certificatePassword").ToString();
@@ -107,24 +107,24 @@ namespace Arrowhead.Utils
 
         public string getServiceRegistryUrl()
         {
-            string scheme = this.ssl ? "https://" : "http://";
+            string scheme = this.CoreSSL ? "https://" : "http://";
             return scheme + this.ServiceRegistryAddress + ":" + this.ServiceRegistryPort;
         }
         public string getOrchestratorUrl()
         {
-            string scheme = this.ssl ? "https://" : "http://";
+            string scheme = this.CoreSSL ? "https://" : "http://";
             return scheme + this.OrchestratorAddress + ":" + this.OrchestratorPort;
         }
 
         public string getAuthorizationUrl()
         {
-            string scheme = this.ssl ? "https://" : "http://";
+            string scheme = this.CoreSSL ? "https://" : "http://";
             return scheme + this.AuthorizationAddress + ":" + this.AuthorizationPort;
         }
 
-        public bool getSSL()
+        public bool getCoreSSL()
         {
-            return ssl;
+            return CoreSSL;
         }
     }
 }

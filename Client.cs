@@ -32,9 +32,9 @@ namespace Arrowhead
             this.settings = settings;
             this.InitCoreSystems();
 
-            string authInfo = this.settings.getSSL() ? Authorization.GetPubicKey() : "";
+            string authInfo = this.settings.getCoreSSL() ? Authorization.GetPubicKey() : "";
 
-            this.system = new Arrowhead.Models.System(this.settings.SystemName, this.settings.Ip, this.settings.Port, authInfo);
+            this.system = new Arrowhead.Models.System(this.settings.SystemName, this.settings.Ip, this.settings.Port, "");
             this.service = new Service(this.system, this.settings.ServiceDefinition, this.settings.Interfaces, this.settings.ApiUri);
             try
             {
