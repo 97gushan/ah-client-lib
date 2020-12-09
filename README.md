@@ -5,6 +5,7 @@ The intention of this library is to make it eaiser for developers to register an
 An example of how to use the library with a basic Producer and Consumer can be found [here](https://github.com/97gushan/arrowhead-client).
 
 ## Developement Dependencies
+* .NET Core Runtime/SDK (tested on 3.0)
 
 ## Runtime Dependencies
 To run a program with the library the mandatory core Arrowhead systems must be running and their ip addresses and ports must be configured correctly.
