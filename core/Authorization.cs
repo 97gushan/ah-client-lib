@@ -40,6 +40,16 @@ namespace Arrowhead.Core
 
             HttpResponseMessage resp = this.http.Post(this.baseUrl, "/mgmt/intracloud", payload);
             resp.EnsureSuccessStatusCode();
+
+            JObject respMessage = JObject.Parse(resp.Content.ReadAsStringAsync().Result);
+            if (respMessage.SelectToken("count").ToObject<int>() > 0)
+            {
+                Console.WriteLine("Intracloud ruleset created");
+            }
+            else
+            {
+                Console.WriteLine("Intracloud ruleset already exists, continuing...");
+            }
         }
 
         public string GetPubicKey()

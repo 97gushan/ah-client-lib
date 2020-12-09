@@ -58,9 +58,7 @@ namespace Arrowhead
             {
                 ServiceResponse resp = ServiceRegistry.GetService(this.settings.ServiceDefinition, providerSystem, this.settings.Interfaces);
                 Authorization.Authorize(consumerSystemId, new string[] { resp.providerId }, new string[] { resp.interfaceId }, new string[] { resp.serviceDefinitionId });
-                Console.WriteLine("Intracloud ruleset created");
                 Orchestrator.StoreOrchestrate(consumerSystemId, this.settings.ServiceDefinition, this.settings.Interfaces[0], providerSystem, cloud);
-                Console.WriteLine("Orchestration store entry added");
             }
             catch (Exception e)
             {

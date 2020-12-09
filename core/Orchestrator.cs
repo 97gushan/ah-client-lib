@@ -80,6 +80,16 @@ namespace Arrowhead.Core
 
             HttpResponseMessage resp = this.http.Post(this.baseUrl, "/mgmt/store", payload);
             resp.EnsureSuccessStatusCode();
+
+            JObject respMessage = JObject.Parse(resp.Content.ReadAsStringAsync().Result);
+            if (respMessage.SelectToken("count").ToObject<int>() > 0)
+            {
+                Console.WriteLine("Orchestration store entry added");
+            }
+            else
+            {
+                Console.WriteLine("Orchestration store entry already exists, continuing...");
+            }
         }
 
         public string GetOrchestrationById(string id)
