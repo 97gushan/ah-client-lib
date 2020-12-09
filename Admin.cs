@@ -39,9 +39,9 @@ namespace Arrowhead
         }
 
         /// <summary>
-        /// Given a Consumer System ID, a Provider Service Definition, a Provider System
-        /// interfaces and cloud information it creates the Intracloud ruleset in the Authenticator
-        /// and stores the Orchestration Entry so that the Consumer can consume the Provider service
+        /// Given a Consumer System ID it creates the Intracloud ruleset in the Authenticator
+        /// and stores the Orchestration Entry in the Orchestrator with the configured system 
+        /// in the settings object. This is done so that the Consumer can consume the Provider service
         /// </summary>
         public void StoreOrchestrate(string consumerSystemId)
         {
