@@ -1,30 +1,28 @@
 using Newtonsoft.Json.Linq;
-using System;
-using Arrowhead.Core;
 namespace Arrowhead.Models
 {
     public class System
     {
-        public string systemName, address, port, id;
-        public string authenticationInfo;
+        public string SystemName, Address, Port, Id;
+        public string AuthenticationInfo;
 
         public System(string systemName, string address, string port, string authenticationInfo)
         {
-            this.systemName = systemName;
-            this.address = address;
-            this.port = port;
-            this.authenticationInfo = authenticationInfo;
+            this.SystemName = systemName;
+            this.Address = address;
+            this.Port = port;
+            this.AuthenticationInfo = authenticationInfo;
         }
 
         /// <summary>
         /// Returns the system name in the Arrowhead common format of "systemname.cloudName.operator.Arrowhead.eu"  
         /// </summary>
-        /// <param name="op"></param>
+        /// <param name="op">operator name</param>
         /// <param name="cloudName"></param>
         /// <returns></returns>
         public string ArrowheadCommonName(string op, string cloudName)
         {
-            return this.systemName + "." + cloudName + "." + op + ".Arrowhead.eu";
+            return this.SystemName + "." + cloudName + "." + op + ".Arrowhead.eu";
         }
 
         /// <summary>
@@ -38,8 +36,10 @@ namespace Arrowhead.Models
             string address = json.SelectToken("address").ToString();
             string port = json.SelectToken("port").ToString();
             string authInfo = json.SelectToken("authenticationInfo").ToString();
+
             System system = new System(systemName, address, port, authInfo);
-            system.id = json.SelectToken("id").ToString();
+            system.Id = json.SelectToken("id").ToString();
+
             return system;
         }
     }

@@ -57,7 +57,7 @@ namespace Arrowhead
             try
             {
                 ServiceResponse resp = ServiceRegistry.GetService(this.settings.ServiceDefinition, providerSystem, this.settings.Interfaces);
-                Authorization.Authorize(consumerSystemId, new string[] { resp.providerId }, new string[] { resp.interfaceId }, new string[] { resp.serviceDefinitionId });
+                Authorization.Authorize(consumerSystemId, new string[] { resp.ProviderId }, new string[] { resp.InterfaceId }, new string[] { resp.ServiceDefinitionId });
                 Orchestrator.StoreOrchestrate(consumerSystemId, this.settings.ServiceDefinition, this.settings.Interfaces[0], providerSystem, cloud);
             }
             catch (Exception e)

@@ -32,15 +32,15 @@ namespace Arrowhead
             this.settings = settings;
             this.InitCoreSystems();
 
-            string authInfo = this.settings.getCoreSSL() ? Authorization.GetPubicKey() : "";
+            string authInfo = this.settings.getCoreSSL() ? Authorization.GetPublicKey() : "";
 
             this.system = new Arrowhead.Models.System(this.settings.SystemName, this.settings.Ip, this.settings.Port, "");
             this.service = new Service(this.system, this.settings.ServiceDefinition, this.settings.Interfaces, this.settings.ApiUri);
             try
             {
                 ServiceResponse serviceResp = (ServiceResponse)ServiceRegistry.RegisterService(this.service);
-                this.system.id = serviceResp.providerId;
-                Console.WriteLine(this.service.serviceDefinition + " was registered on the system " + this.system.systemName);
+                this.system.Id = serviceResp.ProviderId;
+                Console.WriteLine(this.service.ServiceDefinition + " was registered on the system " + this.system.SystemName);
             }
             catch (Exception e)
             {
@@ -51,7 +51,7 @@ namespace Arrowhead
 
         public string GetSystemId()
         {
-            return this.system.id;
+            return this.system.Id;
         }
 
         /// <summary>
@@ -63,23 +63,23 @@ namespace Arrowhead
         /// <returns>A list of URLs that can be used to connect to the service</returns>
         public string[] GetServiceURLs()
         {
-            string baseURL = this.system.address + ":" + this.system.port + this.service.serviceUri + "/";
+            string baseURL = this.system.Address + ":" + this.system.Port + this.service.ServiceUri + "/";
 
-            string[] urls = new string[this.service.interfaces.Length];
+            string[] urls = new string[this.service.Interfaces.Length];
 
-            for (int i = 0; i < this.service.interfaces.Length; i++)
+            for (int i = 0; i < this.service.Interfaces.Length; i++)
             {
-                if (this.service.interfaces[i] == "HTTPS-SECURE-JSON")
+                if (this.service.Interfaces[i] == "HTTPS-SECURE-JSON")
                 {
                     urls[i] = "https://" + baseURL;
                 }
-                else if (this.service.interfaces[i] == "HTTP-INSECURE-JSON")
+                else if (this.service.Interfaces[i] == "HTTP-INSECURE-JSON")
                 {
                     urls[i] = "http://" + baseURL;
                 }
                 else
                 {
-                    throw new Exception("Invalid interface type " + this.service.interfaces[i]);
+                    throw new Exception("Invalid interface type " + this.service.Interfaces[i]);
                 }
             }
 
@@ -94,17 +94,9 @@ namespace Arrowhead
         /// </remarks>
         /// <param name="providerServiceDefinition"></param>
         /// <returns>A JSON array containing all available providers the client system has the rights to consume</returns>
-        public JArray Orchestrate()
+        public OrchestratorResponse[] Orchestrate()
         {
-            JObject resp = this.Orchestrator.OrchestrateStatic(this.system);
-            try
-            {
-                return (JArray)resp.SelectToken("response");
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Could not get Static Orchestration: \n" + resp.ToString());
-            }
+            return this.Orchestrator.OrchestrateStatic(this.system);
         }
 
         /// <summary>

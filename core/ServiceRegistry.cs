@@ -10,61 +10,54 @@ namespace Arrowhead.Core
     public class ServiceRegistry
     {
 
-        private Http http;
-        private string baseUrl;
+        private Http Http;
+        private string BaseUrl;
 
         public ServiceRegistry(Http http, Settings settings)
         {
-            this.baseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
-            this.http = http;
+            this.BaseUrl = settings.getServiceRegistryUrl() + "/serviceregistry";
+            this.Http = http;
         }
 
         public object RegisterService(Service payload)
         {
-            JObject tmp = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(payload));
-            JObject providerSystem = (JObject)tmp.GetValue("providerSystem");
-            tmp.Remove("id");
+            JObject deserializedJson = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(payload));
+            JObject providerSystem = (JObject)deserializedJson.GetValue("providerSystem");
+            deserializedJson.Remove("id");
+            deserializedJson.Remove("providerSystem");
             providerSystem.Remove("id");
-            tmp.Remove("providerSystem");
-            tmp.Add("providerSystem", providerSystem);
-            try
+            deserializedJson.Add("providerSystem", providerSystem);
+            
+            HttpResponseMessage resp = this.Http.Post(this.BaseUrl, "/register", deserializedJson);
+            string respMessage = resp.Content.ReadAsStringAsync().Result;
+            if (resp.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
-                HttpResponseMessage resp = this.http.Post(this.baseUrl, "/register", tmp);
-                string respMessage = resp.Content.ReadAsStringAsync().Result;
-                if (resp.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                if (UnregisterService(payload))
                 {
-                    if (UnregisterService(payload))
-                    {
-                        return (ServiceResponse)RegisterService(payload);
-                    }
-                    else
-                    {
-                        throw new Exception("Could not unregister existing service");
-                    }
+                    return (ServiceResponse)RegisterService(payload);
                 }
                 else
                 {
-                    resp.EnsureSuccessStatusCode();
-                    return new ServiceResponse(JsonConvert.DeserializeObject<JObject>(respMessage));
+                    throw new Exception("Could not unregister existing service");
                 }
             }
-            catch (HttpRequestException e)
+            else
             {
-                Console.WriteLine(e.Message);
-                return e;
+                resp.EnsureSuccessStatusCode();
+                return new ServiceResponse(JsonConvert.DeserializeObject<JObject>(respMessage));
             }
         }
 
         public bool UnregisterService(Service payload)
         {
             // setup query parameters
-            string serviceDefinition = "service_definition=" + payload.serviceDefinition;
-            string address = "address=" + payload.providerSystem.address;
-            string port = "port=" + payload.providerSystem.port;
-            string systemName = "system_name=" + payload.providerSystem.systemName;
+            string serviceDefinition = "service_definition=" + payload.ServiceDefinition;
+            string address = "address=" + payload.ProviderSystem.Address;
+            string port = "port=" + payload.ProviderSystem.Port;
+            string systemName = "system_name=" + payload.ProviderSystem.SystemName;
             try
             {
-                HttpResponseMessage resp = this.http.Delete(this.baseUrl, "/unregister?" + serviceDefinition + "&" + address + "&" + port + "&" + systemName);
+                HttpResponseMessage resp = this.Http.Delete(this.BaseUrl, "/unregister?" + serviceDefinition + "&" + address + "&" + port + "&" + systemName);
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
                 resp.EnsureSuccessStatusCode();
                 return true;
@@ -89,15 +82,18 @@ namespace Arrowhead.Core
         /// <returns></returns>
         public ServiceResponse GetService(string serviceDefinition, JObject providerSystem, string[] providerInterfaces)
         {
-
-            HttpResponseMessage resp = this.http.Get(this.baseUrl, "/mgmt/servicedef/" + serviceDefinition);
+            HttpResponseMessage resp = this.Http.Get(this.BaseUrl, "/mgmt/servicedef/" + serviceDefinition);
             resp.EnsureSuccessStatusCode();
 
             string respMessage = resp.Content.ReadAsStringAsync().Result;
             JObject respObject = JsonConvert.DeserializeObject<JObject>(respMessage);
-
             JArray services = (JArray)respObject.SelectToken("data");
+
             int length = (int)respObject.SelectToken("count");
+            if (length == 0) {
+                throw new Exception("No existing services");
+            }
+
             for (int i = 0; i < length; i++)
             {
                 JObject service = (JObject)services[i];
@@ -110,30 +106,41 @@ namespace Arrowhead.Core
                 }
             }
 
-            return new ServiceResponse();
+            throw new Exception("No service found");
         }
 
 
-        public object GetServices()
+        public ServiceResponse[] GetServices()
         {
-            try
-            {
-                HttpResponseMessage resp = this.http.Get(this.baseUrl, "/mgmt?direction=ASC&sort_field=id");
-                string respMessage = resp.Content.ReadAsStringAsync().Result;
-                return JsonConvert.DeserializeObject(respMessage);
-            }
-            catch (HttpRequestException e)
-            {
-                Console.WriteLine(e.Message);
-                return e;
-            }
-        }
+            HttpResponseMessage resp = this.Http.Get(this.BaseUrl, "/mgmt?direction=ASC&sort_field=id");
+            resp.EnsureSuccessStatusCode();
+            
+            string respMessage = resp.Content.ReadAsStringAsync().Result;
+            JObject respObject = JsonConvert.DeserializeObject<JObject>(respMessage);
 
+            JArray servicesJson = (JArray)respObject.SelectToken("data");
+            int length = (int)respObject.SelectToken("count");
+
+            ServiceResponse[] services = new ServiceResponse[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                JObject service = (JObject)servicesJson[i];
+                JObject system = (JObject)service.SelectToken("provider");
+                JArray interfaces = (JArray)service.SelectToken("interfaces");
+
+                services[i] = new ServiceResponse(service);
+            }
+            return services;
+        }
+        
         public object GetSystems()
         {
+            HttpResponseMessage resp = this.Http.Get(this.BaseUrl, "/mgmt/systems?direction=ASC&sort_field=id");
+            resp.EnsureSuccessStatusCode();
+            
             try
             {
-                HttpResponseMessage resp = this.http.Get(this.baseUrl, "/mgmt/systems?direction=ASC&sort_field=id");
                 string respMessage = resp.Content.ReadAsStringAsync().Result;
                 return JsonConvert.DeserializeObject(respMessage);
             }
@@ -145,7 +152,7 @@ namespace Arrowhead.Core
         }
 
         /// <summary>
-        /// Check if 2 systems have the same name, address and port
+        /// Check if two systems have the same name, address and port
         /// </summary>
         /// <param name="sys1"></param>
         /// <param name="sys2"></param>
@@ -178,26 +185,6 @@ namespace Arrowhead.Core
             }
 
             return false;
-        }
-    }
-
-    public struct ServiceResponse
-    {
-        public string providerId, interfaceId, serviceDefinitionId;
-        public ServiceResponse(JObject payload)
-        {
-            JObject provider = (JObject)payload.GetValue("provider");
-            JArray interfaces = (JArray)payload.GetValue("interfaces");
-            JObject serviceDefinition = (JObject)payload.GetValue("serviceDefinition");
-
-            this.providerId = (string)provider.GetValue("id");
-            this.interfaceId = (string)((JObject)interfaces[0]).GetValue("id");
-            this.serviceDefinitionId = (string)serviceDefinition.GetValue("id");
-        }
-
-        public override string ToString()
-        {
-            return "providerId: " + providerId + "\ninterfaceId: " + interfaceId + "\nserviceDefinitionId: " + serviceDefinitionId;
         }
     }
 }

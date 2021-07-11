@@ -7,15 +7,14 @@ namespace Arrowhead.Core
 {
     public class Authorization
     {
-        private Http http;
-        private string baseUrl;
+        private Http Http;
+        private string BaseUrl;
 
         public Authorization(Http http, Settings settings)
         {
-            this.baseUrl = settings.getAuthorizationUrl() + "/authorization";
-            this.http = http;
+            this.BaseUrl = settings.getAuthorizationUrl() + "/authorization";
+            this.Http = http;
         }
-
 
         /// <summary>
         /// Add a intracloud Authorization ruleset for a consumer system to a list of provider systems with a list of service definitions and interaces
@@ -38,7 +37,7 @@ namespace Arrowhead.Core
             payload.Add("interfaceIds", new JArray(interfaceIds));
             payload.Add("serviceDefinitionIds", new JArray(serviceDefinitionIds));
 
-            HttpResponseMessage resp = this.http.Post(this.baseUrl, "/mgmt/intracloud", payload);
+            HttpResponseMessage resp = this.Http.Post(this.BaseUrl, "/mgmt/intracloud", payload);
             resp.EnsureSuccessStatusCode();
 
             JObject respMessage = JObject.Parse(resp.Content.ReadAsStringAsync().Result);
@@ -52,9 +51,9 @@ namespace Arrowhead.Core
             }
         }
 
-        public string GetPubicKey()
+        public string GetPublicKey()
         {
-            HttpResponseMessage resp = this.http.Get(this.baseUrl, "/publickey");
+            HttpResponseMessage resp = this.Http.Get(this.BaseUrl, "/publickey");
             string respMessage = resp.Content.ReadAsStringAsync().Result;
             return respMessage;
         }

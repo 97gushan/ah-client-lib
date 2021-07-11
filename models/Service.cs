@@ -5,24 +5,23 @@ namespace Arrowhead.Models
 {
     public class Service
     {
-        public string serviceDefinition { get; set; }
-        public string[] interfaces { get; set; }
-        public System providerSystem;
-        public int id;
-
-        public string serviceUri;
+        public string ServiceDefinition { get; set; }
+        public string[] Interfaces { get; set; }
+        public System ProviderSystem;
+        public int Id;
+        public string ServiceUri;
 
         public Service(System system, string serviceDefinition, string[] interfaces, string serviceUri)
         {
-            this.providerSystem = system;
-            this.serviceDefinition = serviceDefinition;
-            this.interfaces = interfaces;
-            this.serviceUri = serviceUri;
+            this.ProviderSystem = system;
+            this.ServiceDefinition = serviceDefinition;
+            this.Interfaces = interfaces;
+            this.ServiceUri = serviceUri;
         }
 
         public override string ToString()
         {
-            return this.serviceDefinition;
+            return this.ServiceDefinition;
         }
 
 
@@ -47,7 +46,7 @@ namespace Arrowhead.Models
                 interfaces[i] = interfacesJson.Value<JToken>(i).SelectToken("interfaceName").ToString();
             }
             Service service = new Service(sys, serviceDef, interfaces, "");
-            service.id = json.SelectToken("id").ToObject<Int32>();
+            service.Id = json.SelectToken("id").ToObject<Int32>();
             return service;
         }
     }

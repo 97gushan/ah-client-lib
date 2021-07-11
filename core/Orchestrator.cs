@@ -3,18 +3,19 @@ using System.Net.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Arrowhead.Utils;
+using Arrowhead.Models;
 
 namespace Arrowhead.Core
 {
     public class Orchestrator
     {
 
-        private Http http;
-        private string baseUrl;
+        private Http Http;
+        private string BaseUrl;
         public Orchestrator(Http http, Settings settings)
         {
-            this.baseUrl = settings.getOrchestratorUrl() + "/orchestrator";
-            this.http = http;
+            this.BaseUrl = settings.getOrchestratorUrl() + "/orchestrator";
+            this.Http = http;
         }
 
         /// <summary>
@@ -31,7 +32,7 @@ namespace Arrowhead.Core
         /// </remarks>
         /// <param name="consumer"></param>
         /// <returns></returns>
-        public JObject OrchestrateStatic(Arrowhead.Models.System consumer)
+        public OrchestratorResponse[] OrchestrateStatic(Arrowhead.Models.System consumer)
         {
             JObject payload = new JObject();
             JObject requesterSystem = JsonConvert.DeserializeObject<JObject>(JsonConvert.SerializeObject(consumer));
@@ -43,10 +44,18 @@ namespace Arrowhead.Core
             payload.Add("requesterSystem", requesterSystem);
             payload.Add("orchestrationFlags", orchestrationFlags);
 
-            HttpResponseMessage resp = this.http.Post(this.baseUrl, "/orchestration", payload);
-            string respMessage = resp.Content.ReadAsStringAsync().Result;
-            JObject result = JsonConvert.DeserializeObject<JObject>(respMessage);
-            return result;
+            HttpResponseMessage resp = this.Http.Post(this.BaseUrl, "/orchestration", payload);
+            string responseMessage = resp.Content.ReadAsStringAsync().Result;
+            JObject jsonMessage = JsonConvert.DeserializeObject<JObject>(responseMessage);
+            JArray response = (JArray)jsonMessage.SelectToken("response");
+
+            OrchestratorResponse[] orchestration = new OrchestratorResponse[response.Count];
+
+            for(int i = 0; i < response.Count; i++) {
+                orchestration[i] = new OrchestratorResponse((JObject) response[i]);
+            }
+
+            return orchestration;
         }
 
         /// <summary>
@@ -78,7 +87,7 @@ namespace Arrowhead.Core
             JArray payload = new JArray();
             payload.Add(entry);
 
-            HttpResponseMessage resp = this.http.Post(this.baseUrl, "/mgmt/store", payload);
+            HttpResponseMessage resp = this.Http.Post(this.BaseUrl, "/mgmt/store", payload);
             resp.EnsureSuccessStatusCode();
 
             JObject respMessage = JObject.Parse(resp.Content.ReadAsStringAsync().Result);
@@ -88,13 +97,13 @@ namespace Arrowhead.Core
             }
             else
             {
-                Console.WriteLine("Orchestration store entry already exists, continuing...");
+                throw new Exception("Orchestration store entry already exists");
             }
         }
 
         public string GetOrchestrationById(string id)
         {
-            HttpResponseMessage resp = this.http.Get(this.baseUrl, "/orchestration/" + id);
+            HttpResponseMessage resp = this.Http.Get(this.BaseUrl, "/orchestration/" + id);
             string respMessage = resp.Content.ReadAsStringAsync().Result;
             return respMessage;
         }
