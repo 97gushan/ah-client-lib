@@ -73,7 +73,7 @@ namespace Arrowhead.Core
         /// <param name="providerSystem"></param>
         /// <param name="cloud"></param>
         /// <returns></returns>
-        public void StoreOrchestrate(string consumerSystemId, string requestedServiceDefinition, string serviceInterfaceName, JObject providerSystem, JObject cloud)
+        public void StoreOrchestrateEntry(string consumerSystemId, string requestedServiceDefinition, string serviceInterfaceName, JObject providerSystem, JObject cloud)
         {
             JObject entry = new JObject();
             entry.Add("serviceDefinitionName", requestedServiceDefinition);
@@ -104,8 +104,7 @@ namespace Arrowhead.Core
         public string GetOrchestrationById(string id)
         {
             HttpResponseMessage resp = this.Http.Get(this.BaseUrl, "/orchestration/" + id);
-            string respMessage = resp.Content.ReadAsStringAsync().Result;
-            return respMessage;
+            return resp.Content.ReadAsStringAsync().Result;
         }
     }
 }

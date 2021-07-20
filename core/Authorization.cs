@@ -54,8 +54,7 @@ namespace Arrowhead.Core
         public string GetPublicKey()
         {
             HttpResponseMessage resp = this.Http.Get(this.BaseUrl, "/publickey");
-            string respMessage = resp.Content.ReadAsStringAsync().Result;
-            return respMessage;
+            return resp.Content.ReadAsStringAsync().Result;
         }
     }
 }

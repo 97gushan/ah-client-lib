@@ -43,7 +43,7 @@ namespace Arrowhead
         /// and stores the Orchestration Entry in the Orchestrator with the configured system 
         /// in the settings object. This is done so that the Consumer can consume the Provider service
         /// </summary>
-        public void StoreOrchestrate(string consumerSystemId)
+        public void StoreOrchestrateEntry(string consumerSystemId)
         {
             JObject providerSystem = new JObject();
             providerSystem.Add("systemName", this.settings.SystemName);
@@ -58,11 +58,12 @@ namespace Arrowhead
             {
                 ServiceResponse resp = ServiceRegistry.GetService(this.settings.ServiceDefinition, providerSystem, this.settings.Interfaces);
                 Authorization.Authorize(consumerSystemId, new string[] { resp.ProviderId }, new string[] { resp.InterfaceId }, new string[] { resp.ServiceDefinitionId });
-                Orchestrator.StoreOrchestrate(consumerSystemId, this.settings.ServiceDefinition, this.settings.Interfaces[0], providerSystem, cloud);
+                Orchestrator.StoreOrchestrateEntry(consumerSystemId, this.settings.ServiceDefinition, this.settings.Interfaces[0], providerSystem, cloud);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                throw new Exception("Could not store orchestration entry");
             }
         }
 
